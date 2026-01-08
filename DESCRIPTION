@@ -1,0 +1,15 @@
+Package: MeatColor
+Title: Meat color analysis from Hunter MiniScan or other colorimeters
+Version: 0.0.0.9000
+Authors@R: 
+    person("Reese", "Wilson", , "Roofrog764@gmail.com", role = c("aut", "cre"))
+Description: 
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports: 
+    colorspace,
+    dplyr,
+    ggplot2,
+    magrittr
