@@ -3,7 +3,9 @@ Title: Meat color analysis from Hunter MiniScan or other colorimeters
 Version: 0.0.0.9000
 Authors@R: 
     person("Reese", "Wilson", , "Roofrog764@gmail.com", role = c("aut", "cre"))
-Description: 
+Description: Provides functions to summarize and visualize L*a*b* colorimeter 
+    data commonly used in meat science research. The package simplifies the 
+    process of creating color visualization plots from colorimeter measurements.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -12,4 +14,8 @@ Imports:
     colorspace,
     dplyr,
     ggplot2,
-    magrittr
+    magrittr,
+    rlang
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

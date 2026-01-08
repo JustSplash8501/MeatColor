@@ -2,6 +2,8 @@
 ^renv\.lock$
 ^MeatColor\.Rproj$
 ^\.Rproj\.user$
+packageBuilding.R
+^tests$
 
 ^.*\.Rproj$
 ^\.Rproj\.user$

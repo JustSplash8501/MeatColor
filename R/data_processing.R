@@ -28,6 +28,6 @@ summarize_lab <- function(
 
   data_summary |>
     dplyr::mutate(
-      color = colorspace::hex(colorspace::LAB(l_mean, a_mean, b_mean))
+      color = colorspace::hex(colorspace::LAB(.data$l_mean, .data$a_mean, .data$b_mean))
     )
 }

@@ -2,6 +2,7 @@
 ^renv\.lock$
 
 .Rproj.user/
+*.tar.gz
 
 .env
 

@@ -11,13 +11,16 @@
 #'   scale_y_continuous labs facet_wrap theme_bw theme element_blank element_text
 #' @importFrom dplyr mutate
 #' @export
-plot_lab_colors <- function(
-  data,
-  x_var,
-  facet_var = NULL,
-  x_label = "Time Point",
-  title = "L*a*b* Color Plot"
-) {
+plot_lab_colors <- function(data, x_var, facet_var = NULL,
+                            x_label = "Time Point", 
+                            title = "L*a*b* Color Plot") {
+  
+  # Validate required columns
+  required_cols <- c("l_mean", "a_mean", "b_mean", "color", "xmin", "xmax", "ymin", "ymax")
+  missing_cols <- setdiff(required_cols, names(data))
+  if (length(missing_cols) > 0) {
+    stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
+  } 
   # Prepare plotting data
   plot_data <- data |>
     dplyr::mutate(
@@ -31,11 +34,11 @@ plot_lab_colors <- function(
   p <- ggplot2::ggplot(
     plot_data,
     ggplot2::aes(
-      xmin = xmin,
-      xmax = xmax,
-      ymin = ymin,
-      ymax = ymax,
-      fill = color
+      xmin = .data$xmin,
+      xmax = .data$xmax,
+      ymin = .data$ymin,
+      ymax = .data$ymax,
+      fill = .data$color
     )
   ) +
     ggplot2::geom_rect(color = "black", linewidth = 1) +
