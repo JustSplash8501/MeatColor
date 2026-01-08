@@ -23,3 +23,5 @@ packageBuilding.R
 ^\.Rbuildignore$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
+^doc$
+^Meta$

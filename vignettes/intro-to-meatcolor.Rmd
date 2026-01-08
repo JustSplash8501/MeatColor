@@ -1,0 +1,176 @@
+---
+title: "Introduction to MeatColor"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to MeatColor}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+```{r setup}
+library(MeatColor)
+library(dplyr)
+library(ggplot2)
+```
+
+## Overview
+
+The `MeatColor` package provides tools to visualize L\*a\*b\* colorimeter data commonly used in meat science research. The package includes two main functions:
+
+- `summarize_lab()`: Summarizes L\*a\*b\* color measurements by grouping variables
+- `plot_lab_colors()`: Creates visual representations of color data as colored rectangles
+
+## Basic Workflow
+
+### Step 1: Prepare Your Data
+
+Your data should contain:
+- L\*, a\*, b\* color measurements (typically named `l`, `a`, `b`)
+- Grouping variables (e.g., treatment, time point, product)
+```{r example-data}
+# Example dataset
+color_data <- data.frame(
+  product = rep(c("Beef", "Pork"), each = 12),
+  treatment = rep(rep(c("Control", "Vacuum"), each = 6), times = 2),
+  time_point = rep(rep(c("Day 0", "Day 7", "Day 14"), each = 2), times = 4),
+  replicate = rep(1:2, times = 12),
+  l = c(45.2, 44.8, 42.1, 41.9, 39.5, 39.2,
+        46.1, 45.9, 43.2, 42.8, 40.1, 39.9,
+        48.3, 48.1, 45.5, 45.2, 42.8, 42.5,
+        49.2, 48.9, 46.3, 46.1, 43.5, 43.2),
+  a = c(18.5, 18.8, 16.2, 16.5, 14.1, 14.3,
+        17.9, 18.1, 15.8, 16.1, 13.9, 14.2,
+        12.3, 12.5, 10.8, 11.1, 9.5, 9.7,
+        11.8, 12.1, 10.5, 10.7, 9.2, 9.4),
+  b = c(12.1, 12.3, 10.5, 10.7, 9.2, 9.4,
+        11.8, 12.0, 10.3, 10.5, 9.0, 9.2,
+        8.5, 8.7, 7.2, 7.4, 6.1, 6.3,
+        8.2, 8.4, 7.0, 7.2, 5.9, 6.1)
+)
+
+head(color_data)
+```
+
+### Step 2: Summarize the Data
+
+Use `summarize_lab()` to calculate mean L\*a\*b\* values for each combination of grouping variables:
+```{r summarize}
+color_summary <- summarize_lab(
+  data = color_data,
+  group_vars = c("product", "treatment", "time_point")
+)
+
+color_summary
+```
+
+The function automatically:
+- Calculates mean L\*, a\*, b\* values
+- Converts them to hex colors for visualization
+- Handles missing values with `na.rm = TRUE`
+
+### Step 3: Visualize the Colors
+
+Create a color plot showing how colors change across conditions:
+```{r plot-basic, fig.width=8, fig.height=4}
+plot_lab_colors(
+  data = color_summary,
+  x_var = "time_point",
+  facet_var = "product",
+  x_label = "Storage Duration",
+  title = "Meat Color Changes During Storage"
+)
+```
+
+## Advanced Usage
+
+### Custom Column Names
+
+If your L\*a\*b\* columns have different names:
+```{r custom-cols, eval=FALSE}
+# Data with columns named L_star, a_star, b_star
+summarize_lab(
+  data = my_data,
+  group_vars = c("treatment", "day"),
+  l_col = "L_star",
+  a_col = "a_star",
+  b_col = "b_star"
+)
+```
+
+### Single Grouping Variable
+```{r single-group}
+# Summarize by time point only
+time_summary <- summarize_lab(
+  data = color_data,
+  group_vars = "time_point"
+)
+
+plot_lab_colors(
+  data = time_summary,
+  x_var = "time_point",
+  x_label = "Day",
+  title = "Overall Color Change"
+)
+```
+
+### No Faceting
+```{r no-facet}
+# Plot without faceting
+treatment_summary <- summarize_lab(
+  data = color_data %>% filter(product == "Beef"),
+  group_vars = c("treatment", "time_point")
+)
+
+plot_lab_colors(
+  data = treatment_summary,
+  x_var = "time_point",
+  x_label = "Day"
+)
+```
+
+### Customizing Plots
+
+Since `plot_lab_colors()` returns a ggplot object, you can add additional layers:
+```{r customize, fig.width=8, fig.height=4}
+plot_lab_colors(
+  data = color_summary,
+  x_var = "time_point",
+  facet_var = "treatment"
+) +
+  labs(caption = "Data from XYZ study, 2024") +
+  theme(
+    plot.caption = element_text(hjust = 0, size = 10),
+    strip.background = element_rect(fill = "lightblue")
+  )
+```
+
+## Interpreting Results
+
+The colored rectangles represent the actual color as determined by the L\*a\*b\* values:
+
+- **L\*** (lightness): 0 = black, 100 = white
+- **a\***: negative = green, positive = red
+- **b\***: negative = blue, positive = yellow
+
+This visualization allows you to quickly see:
+- Color changes over time
+- Differences between treatments
+- Product-specific color characteristics
+
+## Tips
+
+1. **Ensure consistent grouping**: All grouping variables should be factors or characters
+2. **Handle missing data**: The functions use `na.rm = TRUE` by default
+3. **Check your data**: Make sure L\*, a\*, b\* values are in typical ranges (L\*: 0-100, a\* and b\*: typically -60 to +60)
+4. **Export plots**: Use `ggsave()` to save plots for publications
+```{r save-plot, eval=FALSE}
+p <- plot_lab_colors(color_summary, x_var = "time_point", facet_var = "product")
+ggsave("color_plot.png", p, width = 8, height = 4, dpi = 300)
+```
