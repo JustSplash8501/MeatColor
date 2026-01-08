@@ -67,3 +67,4 @@ renv/
 
 packageBuilding.R
 *.Rproj
+.github/
