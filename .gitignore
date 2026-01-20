@@ -81,3 +81,6 @@ vignettes/*_files/
 Meta/
 doc/
 inst/doc/
+
+formulation.md
+color.png

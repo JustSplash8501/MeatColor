@@ -39,6 +39,10 @@ plot_lab_colors(
 )
 ```
 
+## Math Logic
+
+A detailed explaination of the math for conveting the CIE LAB through XYZ to RGB can be found in `formulation.pdf`.
+
 ## Contributing
 
 Contributions are welcome! To contribute to this package:
