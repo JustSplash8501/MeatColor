@@ -61,7 +61,7 @@ venv.bak/
 # renv (R environment management)
 renv/
 # Only if renv created it - be careful with this one
-.Rprofile  
+.Rprofile
 .Rproj.user
 .quarto
 
@@ -84,3 +84,5 @@ inst/doc/
 
 formulation.md
 color.png
+Screenshot 2026-01-20 at 11.43.02.png
+/.quarto/
