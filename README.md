@@ -38,6 +38,7 @@ plot_lab_colors(
   title = "L*a*b* Color Changes Over Time"
 )
 ```
+Of note, the plot_lab_color uses the ggplot2 library to build visuals. Because of this, you can easily alter the aesthetics of the plot to fit your needs.
 
 ## Math Logic
 
