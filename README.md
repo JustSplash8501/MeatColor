@@ -42,7 +42,7 @@ Of note, the `plot_lab_color` uses the ggplot2 library to build visuals. Because
 
 ## Math Logic
 
-A detailed explanation of the math for converting CIE LAB through XYZ to RGB can be found in [formulation.md](formulation.md).
+A detailed explanation of the math for converting CIELAB through CIEXYZ to sRGB can be found in [formulation.md](formulation.md).
 
 ## Contributing
 

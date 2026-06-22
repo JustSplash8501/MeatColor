@@ -1,207 +1,228 @@
-# CIE LAB to RGB Hexcode Conversion
+# CIELAB to sRGB Hex Conversion
 
-## Overview
+## Scope and assumptions
 
-This document describes the process of converting colors from the CIE LAB color space to RGB hexadecimal codes. The conversion involves two intermediate steps: LAB → XYZ → RGB → Hex.
+`MeatColor::summarize_lab()` converts mean CIELAB coordinates with:
 
-## Step 1: Convert CIE LAB to XYZ
+```r
+colorspace::hex(colorspace::LAB(L, a, b))
+```
 
-The CIE LAB color space uses three components:
+The conversion path is CIELAB → CIEXYZ → linear-light sRGB → encoded
+sRGB → hexadecimal.
 
--   $L^*$ (Lightness): 0 to 100
--   $a^*$ (green to red): typically -128 to +127
--   $b^*$ (blue to yellow): typically -128 to +127
+This calculation assumes:
 
-### Conversion Formulas
+- the input is **CIE 1976 L\*a\*b\*** (CIELAB), not Hunter Lab;
+- the CIELAB values use the same D65/2° reference white as the `colorspace`
+  package default; and
+- the intended output is the sRGB display color space.
 
-First, calculate the intermediate f values:
+Colorimeter exports can depend on illuminant, observer angle, and color-space
+settings. Confirm that the instrument exported CIELAB values under D65 with
+the 2° standard observer before interpreting the generated hex values as
+sRGB. Values measured relative to another white point or observer require an
+appropriate conversion before the sRGB matrix is applied.
 
-$$f_y = \frac{L^* + 16}{116}$$
+## Step 1: Convert CIELAB to CIEXYZ
 
-$$f_x = \frac{a^*}{500} + f_y$$
+For CIELAB coordinates \(L^*\), \(a^*\), and \(b^*\), define:
 
-$$f_z = f_y - \frac{b^*}{200}$$
+$$
+f_y = \frac{L^* + 16}{116}, \qquad
+f_x = f_y + \frac{a^*}{500}, \qquad
+f_z = f_y - \frac{b^*}{200}
+$$
 
-Then calculate the relative XYZ values using the inverse transformation:
+Use the exact CIELAB constants:
 
-$$x_r = \begin{cases}
-{f_x}^3 & \text{if } {f_x}^3 > \epsilon \\
-\frac{116 f_x - 16}{\kappa} & \text{otherwise}
-\end{cases}$$
+$$
+\epsilon = \frac{216}{24389} \approx 0.008856451679
+$$
 
-$$y_r = \begin{cases}
-{\left(\frac{L^* + 16}{116}\right)}^3 & \text{if } L^* > \kappa \epsilon \\
-\frac{L^*}{\kappa} & \text{otherwise}
-\end{cases}$$
+$$
+\kappa = \frac{24389}{27} \approx 903.2962963
+$$
 
-$$z_r = \begin{cases}
-{f_z}^3 & \text{if } {f_z}^3 > \epsilon \\
-\frac{116 f_z - 16}{\kappa} & \text{otherwise}
-\end{cases}$$
+The inverse CIELAB transfer function is:
 
-Where the constants are defined as:
+$$
+f^{-1}(t) =
+\begin{cases}
+t^3 & \text{if } t^3 > \epsilon \\
+\dfrac{116t - 16}{\kappa} & \text{otherwise}
+\end{cases}
+$$
 
-$$\epsilon = \begin{cases}
-0.008856 & \text{Actual CIE standard} \\
-\frac{216}{24389} & \text{Intent of the CIE standard}
-\end{cases}$$
+The relative tristimulus values are:
 
-$$\kappa = \begin{cases}
-903.3 & \text{Actual CIE standard} \\
-\frac{24389}{27} & \text{Intent of the CIE standard}
-\end{cases}$$
+$$
+x_r = f^{-1}(f_x), \qquad
+y_r =
+\begin{cases}
+f_y^3 & \text{if } L^* > 8 \\
+\dfrac{L^*}{\kappa} & \text{otherwise}
+\end{cases},
+\qquad
+z_r = f^{-1}(f_z)
+$$
 
-For most applications, use the "intent" values: $\epsilon = \frac{216}{24389} \approx 0.008856$ and $\kappa = \frac{24389}{27} \approx 903.3$
+The boundary \(L^*=8\) follows from \(\kappa\epsilon=8\).
 
-Finally, scale by the reference white point (D65 illuminant):
+For the D65 reference white used by `colorspace`, scaled so \(Y_n=100\):
 
-$$X = x_r \times X_r$$
+$$
+(X_n, Y_n, Z_n) = (95.047,\ 100.000,\ 108.883)
+$$
 
-$$Y = y_r \times Y_r$$
+Then:
 
-$$Z = z_r \times Z_r$$
+$$
+X = X_n x_r, \qquad Y = Y_n y_r, \qquad Z = Z_n z_r
+$$
 
-Reference white D65 (scaled to Y = 100): - $X_r = 95.047$ - $Y_r = 100.000$ - $Z_r = 108.883$
+XYZ components are not each restricted to \([0,100]\). In particular, the
+D65 reference-white value \(Z_n\) is greater than 100, and colors outside the
+sRGB gamut can produce values outside the usual display range.
 
-Note: The output XYZ values are in the nominal range \[0.0, 100.0\] when using these reference white values.
+## Step 2: Convert CIEXYZ to linear-light sRGB
 
-## Step 2: Convert XYZ to RGB
+The `colorspace` implementation uses XYZ values scaled to \(Y_n=100\) and the
+following D65 matrix:
 
-The XYZ values must first be scaled to the range \[0, 1\]:
-
-$$X' = \frac{X}{100}, \quad Y' = \frac{Y}{100}, \quad Z' = \frac{Z}{100}$$
-
-### Transformation Matrix (sRGB)
-
-Apply the transformation matrix for sRGB color space:
-
-$\begin{bmatrix}
+$$
+\begin{bmatrix}
 r \\
 g \\
 b
-\end{bmatrix} = \begin{bmatrix}
-+3.2404542 & -1.5371385 & -0.4985314 \\
--0.9692660 & +1.8760108 & +0.0415560 \\
-+0.0556434 & -0.2040259 & +1.0572252
-\end{bmatrix} \begin{bmatrix}
-X' \\
-Y' \\
-Z'
-\end{bmatrix}$
+\end{bmatrix}
+=
+\begin{bmatrix}
+ 3.240479 & -1.537150 & -0.498535 \\
+-0.969256 &  1.875992 &  0.041556 \\
+ 0.055648 & -0.204043 &  1.057311
+\end{bmatrix}
+\begin{bmatrix}
+X/100 \\
+Y/100 \\
+Z/100
+\end{bmatrix}
+$$
 
-Or equivalently:
+Here \(r\), \(g\), and \(b\) are linear-light components, not yet encoded
+sRGB values.
 
-$r = 3.2404542 \times X' - 1.5371385 \times Y' - 0.4985314 \times Z'$
+## Step 3: Apply the sRGB transfer function
 
-$g = -0.9692660 \times X' + 1.8760108 \times Y' + 0.0415560 \times Z'$
+For each linear-light component \(v\), the IEC sRGB encoding function is:
 
-$b = 0.0556434 \times X' - 0.2040259 \times Y' + 1.0572252 \times Z'$
+$$
+V =
+\begin{cases}
+12.92v & \text{if } v \le 0.0031308 \\
+1.055v^{1/2.4} - 0.055 & \text{if } v > 0.0031308
+\end{cases}
+$$
 
-Note: These are linear (lowercase) RGB values. The matrix **M** converts XYZ tristimulus values to linear RGB values before gamma correction is applied. Both XYZ and RGB values must use the same reference white (D65 for sRGB).
+The current `colorspace` C implementation uses `0.00304` as its branch
+threshold. This small implementation difference does not affect the worked
+example below, but the formula above gives the standard sRGB threshold.
 
-### Gamma Correction (Companding)
+## Step 4: Quantize and encode as hexadecimal
 
-Apply the sRGB companding function to convert from linear to companded RGB:
+For an in-gamut encoded component \(V\):
 
-For each linear component $v$ in $\{r, g, b\}$, calculate the companded component $V$ in $\{R, G, B\}$:
+$$
+C_8 = \operatorname{round}(255V)
+$$
 
-$$V = \begin{cases}
-12.92 \times v & \text{if } v \leq 0.0031308 \\
-1.055 \times v^{1/2.4} - 0.055 & \text{otherwise}
-\end{cases}$$
+Each resulting integer is written as a two-digit hexadecimal value and
+concatenated:
 
-### Clipping and Scaling
+$$
+\text{hex} = \texttt{\#RRGGBB}
+$$
 
-Clip values to \[0, 1\] and scale to \[0, 255\]:
+`MeatColor` currently calls `colorspace::hex()` with its default
+`fixup = FALSE`. Therefore, if any rounded component lies outside 0–255,
+`colorspace` returns `NA` rather than clipping the color. Calling
+`colorspace::hex(..., fixup = TRUE)` would instead clamp out-of-range
+components to the nearest endpoint.
 
-$$R = \left\lfloor \max(0, \min(1, R)) \times 255 \right\rceil$$
+## Verified example: CIELAB(50, 25, -25)
 
-$$G = \left\lfloor \max(0, \min(1, G)) \times 255 \right\rceil$$
+First:
 
-$$B = \left\lfloor \max(0, \min(1, B)) \times 255 \right\rceil$$
+$$
+f_y = 0.5689655172,\qquad
+f_x = 0.6189655172,\qquad
+f_z = 0.6939655172
+$$
 
-Where $\lfloor \cdot \rceil$ denotes rounding to the nearest integer.
+All three values use the cubic branch:
 
-## Step 3: Convert RGB to Hexcode
+$$
+x_r = 0.2371370239,\qquad
+y_r = 0.1841865185,\qquad
+z_r = 0.3342055621
+$$
 
-Convert each 8-bit RGB component to hexadecimal and concatenate:
+Scaling by the D65 reference white gives:
 
-$$\text{hex} = \text{#} + \text{hex}(R) + \text{hex}(G) + \text{hex}(B)$$
+$$
+X = 22.53916271,\qquad
+Y = 18.41865185,\qquad
+Z = 36.38930421
+$$
 
-Each component should be represented as a 2-digit hexadecimal value (00-FF).
+Using the matrix implemented by `colorspace` gives linear-light sRGB:
 
-## Example Conversion
+$$
+r = 0.2658411096,\qquad
+g = 0.1421921876,\qquad
+b = 0.3597087397
+$$
 
-Let's convert $\text{LAB}(50, 25, -25)$ to hex:
+After sRGB encoding:
 
-### Step 1: LAB to XYZ
+$$
+R = 0.5524516066,\qquad
+G = 0.4130411268,\qquad
+B = 0.6340203340
+$$
 
-Calculate the f values:
+Quantizing to 8-bit components gives:
 
-$$f_y = \frac{50 + 16}{116} = 0.5690$$
+$$
+(R_8,G_8,B_8) = (141,105,162)
+$$
 
-$$f_x = \frac{25}{500} + 0.5690 = 0.6190$$
+Therefore:
 
-$$f_z = 0.5690 - \frac{-25}{200} = 0.6940$$
+$$
+\boxed{\texttt{\#8D69A2}}
+$$
 
-Check conditions (using $\epsilon = 0.008856$, $\kappa = 903.3$):
+This result matches:
 
-For $x_r$: ${f_x}^3 = (0.6190)^3 = 0.2369 > 0.008856$, so $x_r = 0.2369$
+```r
+colorspace::hex(colorspace::LAB(50, 25, -25))
+#> "#8D69A2"
+```
 
-For $y_r$: $L^* = 50 > \kappa \epsilon = 8.0$, so $y_r = {(0.5690)}^3 = 0.1841$
+## Interpretation limits
 
-For $z_r$: ${f_z}^3 = (0.6940)^3 = 0.3341 > 0.008856$, so $z_r = 0.3341$
-
-Scale by reference white:
-
-$$X = 0.2369 \times 95.047 = 22.51$$
-
-$$Y = 0.1841 \times 100.000 = 18.41$$
-
-$$Z = 0.3341 \times 108.883 = 36.38$$
-
-### Step 2: XYZ to RGB
-
-Scale to \[0, 1\]:
-
-$$X' = 0.2251, \quad Y' = 0.1841, \quad Z' = 0.3638$$
-
-Linear RGB:
-
-$r = 3.2404542 \times 0.2251 - 1.5371385 \times 0.1841 - 0.4985314 \times 0.3638 = 0.2650$
-
-$g = -0.9692660 \times 0.2251 + 1.8760108 \times 0.1841 + 0.0415560 \times 0.3638 = 0.1421$
-
-$b = 0.0556434 \times 0.2251 - 0.2040259 \times 0.1841 + 1.0572252 \times 0.3638 = 0.3850$
-
-Apply gamma correction (all values $> 0.0031308$):
-
-$$R = 1.055 \times (0.2650)^{1/2.4} - 0.055 = 0.5562$$
-
-$$G = 1.055 \times (0.1421)^{1/2.4} - 0.055 = 0.4115$$
-
-$$B = 1.055 \times (0.3850)^{1/2.4} - 0.055 = 0.6549$$
-
-Scale to \[0, 255\]:
-
-$$R = 142, \quad G = 105, \quad B = 167$$
-
-### Step 3: RGB to Hex
-
-$$\text{hex} = \text{#8E69A7}$$
-
-![Example color conversion output](Screenshot%202026-01-20%20at%2011.43.02.png)
-
-## Notes
-
--   Colors outside the sRGB gamut will be clipped, which may result in loss of color accuracy
--   The D65 illuminant is the standard for sRGB; other illuminants will produce different results
--   If your XYZ values use a different reference white, you must apply chromatic adaptation before converting to RGB
--   Rounding errors may accumulate through the conversion process
--   For more accurate conversions, maintain higher precision throughout intermediate calculations
+- A screen swatch is an sRGB approximation of measured color, not a
+  color-managed reproduction of the physical meat sample.
+- CIELAB coordinates are meaningful only with their reference illuminant,
+  observer, and measurement geometry.
+- Out-of-gamut CIELAB colors cannot be represented exactly in sRGB.
+- Keep full precision through the intermediate calculations and round only
+  when producing the final 8-bit channels.
 
 ## References
 
--   CIE 1976 $L^*a^*b^*$ Color Space
--   IEC 61966-2-1:1999 (sRGB standard)
--   Bruce Lindbloom's Color Conversion Mathematics (http://www.brucelindbloom.com)
+- [CIE 15:2018, *Colorimetry, 4th Edition*](https://cie.co.at/publications/colorimetry-4th-edition)
+- [ICC sRGB registry entry (IEC 61966-2-1)](https://registry.color.org/rgb-registry/srgb)
+- [CRAN `colorspace` reference manual](https://cran.r-project.org/web/packages/colorspace/refman/colorspace.html)
+- [`colorspace` conversion source](https://github.com/cran/colorspace/blob/master/src/colorspace.c)
