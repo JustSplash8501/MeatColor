@@ -1,9 +1,9 @@
 # MeatColor
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/JustSplash8501/MeatColor/workflows/R-CMD-check/badge.svg)](https://github.com/JustSplash8501/MeatColor/actions) 
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) 
-[![CRAN status](https://www.r-pkg.org/badges/version/MeatColor)](https://CRAN.R-project.org/package=MeatColor) 
+[![R-CMD-check](https://github.com/JustSplash8501/MeatColor/actions/workflows/R-CMD-check.yaml/badge.svg?branch=master)](https://github.com/JustSplash8501/MeatColor/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Version: 0.0.0.9000](https://img.shields.io/badge/version-0.0.0.9000-blue.svg)](https://github.com/JustSplash8501/MeatColor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
