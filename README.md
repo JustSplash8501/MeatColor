@@ -19,7 +19,7 @@ pak::pak("JustSplash8501/MeatColor")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+An example of how to use the functions in this package:
 ``` r
 library(MeatColor)
 
@@ -38,7 +38,7 @@ plot_lab_colors(
   title = "L*a*b* Color Changes Over Time"
 )
 ```
-Of note, the plot_lab_color uses the ggplot2 library to build visuals. Because of this, you can easily alter the aesthetics of the plot to fit your needs.
+Of note, the `plot_lab_color` uses the ggplot2 library to build visuals. Because of this, you can easily alter the aesthetics of the plot to fit your needs.
 
 ## Math Logic
 
