@@ -4,7 +4,14 @@
 \alias{summarize_lab}
 \title{Summarize LAB color data}
 \usage{
-summarize_lab(data, group_vars, l_col = "l", a_col = "a", b_col = "b")
+summarize_lab(
+  data,
+  group_vars,
+  l_col = "l",
+  a_col = "a",
+  b_col = "b",
+  fixup = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame containing LAB color measurements}
@@ -16,6 +23,9 @@ summarize_lab(data, group_vars, l_col = "l", a_col = "a", b_col = "b")
 \item{a_col}{Name of the a* column (default "a")}
 
 \item{b_col}{Name of the b* column (default "b")}
+
+\item{fixup}{Logical. If \code{TRUE}, out-of-gamut colors are corrected to the
+closest displayable sRGB color. Defaults to \code{FALSE}.}
 }
 \value{
 A data frame with mean LAB values and hex colors

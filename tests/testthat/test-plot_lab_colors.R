@@ -44,7 +44,10 @@ test_that("plot_lab_colors uses identity scale for colors", {
   p <- plot_lab_colors(test_summary, x_var = "time_point")
 
   # Check that scale_fill_identity is used
-  expect_true("ScaleFillIdentity" %in% class(p$scales$get_scales("fill")))
+  expect_true(
+    any(c("ScaleFillIdentity", "ScaleDiscreteIdentity") %in%
+      class(p$scales$get_scales("fill")))
+  )
 })
 
 test_that("plot_lab_colors applies custom labels", {

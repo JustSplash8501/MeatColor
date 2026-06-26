@@ -7,8 +7,7 @@
 #' @param title Plot title
 #'
 #' @return A ggplot object
-#' @importFrom ggplot2 ggplot aes geom_rect scale_fill_identity scale_x_continuous
-#'   scale_y_continuous labs facet_wrap theme_bw theme element_blank element_text
+#' @importFrom ggplot2 ggplot aes geom_rect scale_fill_identity scale_x_continuous scale_y_continuous labs facet_wrap theme_bw theme element_blank element_text
 #' @importFrom dplyr mutate
 #' @export
 plot_lab_colors <- function(

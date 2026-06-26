@@ -72,6 +72,43 @@ test_that("summarize_lab returns valid hex colors", {
   expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", result$color)))
 })
 
+test_that("lab_to_hex converts LAB values to valid hex colors", {
+  result <- lab_to_hex(l = c(45, 50), a = c(15, 14), b = c(10, 9))
+
+  expect_type(result, "character")
+  expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", result)))
+})
+
+test_that("lab_to_hex warns for out-of-gamut colors without fixup", {
+  expect_warning(
+    result <- lab_to_hex(l = 50, a = 0, b = -300),
+    "out-of-gamut LAB colors detected. Use fixup = TRUE to resolve NA values"
+  )
+
+  expect_true(is.na(result))
+})
+
+test_that("lab_to_hex can fix out-of-gamut colors", {
+  result <- lab_to_hex(l = 50, a = 0, b = -300, fixup = TRUE)
+
+  expect_false(is.na(result))
+  expect_true(grepl("^#[0-9A-Fa-f]{6}$", result))
+})
+
+test_that("summarize_lab passes fixup through to color conversion", {
+  out_of_gamut_data <- test_data
+  out_of_gamut_data$b <- -300
+
+  expect_warning(
+    result <- summarize_lab(out_of_gamut_data, group_vars = "product"),
+    "out-of-gamut LAB colors detected. Use fixup = TRUE to resolve NA values"
+  )
+  expect_true(any(is.na(result$color)))
+
+  fixed_result <- summarize_lab(out_of_gamut_data, group_vars = "product", fixup = TRUE)
+  expect_false(any(is.na(fixed_result$color)))
+})
+
 test_that("summarize_lab errors with missing columns", {
   bad_data <- test_data[, c("product", "treatment")]
 
