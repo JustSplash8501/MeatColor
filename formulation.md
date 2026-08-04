@@ -96,8 +96,7 @@ r \\
 g \\
 b
 \end{bmatrix}
-=
-\begin{bmatrix}
+= \begin{bmatrix}
  3.240479 & -1.537150 & -0.498535 \\
 -0.969256 &  1.875992 &  0.041556 \\
  0.055648 & -0.204043 &  1.057311
@@ -139,9 +138,7 @@ $$
 Each resulting integer is written as a two-digit hexadecimal value and
 concatenated:
 
-$$
-\text{hex} = \texttt{\#RRGGBB}
-$$
+**hex** = `#RRGGBB`
 
 `MeatColor` currently calls `colorspace::hex()` with its default
 `fixup = FALSE`. Therefore, if any rounded component lies outside 0–255,
@@ -199,9 +196,7 @@ $$
 
 Therefore:
 
-$$
-\boxed{\texttt{\#8D69A2}}
-$$
+**Result:** `#8D69A2`
 
 This result matches:
 
