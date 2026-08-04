@@ -26,12 +26,12 @@ appropriate conversion before the sRGB matrix is applied.
 
 ## Step 1: Convert CIELAB to CIEXYZ
 
-For CIELAB coordinates \(L^*\), \(a^*\), and \(b^*\), define:
+For CIELAB coordinates \(L^{*}\), \(a^{*}\), and \(b^{*}\), define:
 
 $$
-f_y = \frac{L^* + 16}{116}, \qquad
-f_x = f_y + \frac{a^*}{500}, \qquad
-f_z = f_y - \frac{b^*}{200}
+f_y = \frac{L^{*} + 16}{116}, \qquad
+f_x = f_y + \frac{a^{*}}{500}, \qquad
+f_z = f_y - \frac{b^{*}}{200}
 $$
 
 Use the exact CIELAB constants:
@@ -60,14 +60,14 @@ $$
 x_r = f^{-1}(f_x), \qquad
 y_r =
 \begin{cases}
-f_y^3 & \text{if } L^* > 8 \\
-\dfrac{L^*}{\kappa} & \text{otherwise}
+f_y^3 & \text{if } L^{*} > 8 \\
+\dfrac{L^{*}}{\kappa} & \text{otherwise}
 \end{cases},
 \qquad
 z_r = f^{-1}(f_z)
 $$
 
-The boundary \(L^*=8\) follows from \(\kappa\epsilon=8\).
+The boundary \(L^{*}=8\) follows from \(\kappa\epsilon=8\).
 
 For the D65 reference white used by `colorspace`, scaled so \(Y_n=100\):
 
