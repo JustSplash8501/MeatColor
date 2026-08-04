@@ -86,7 +86,7 @@ Please also review the complete [contribution guide](CONTRIBUTING.md).
 
 2. **Clone your fork** locally:
 ```bash
-   git clone https://github.com/YOUR_USERNAME/MeatColor.git
+   git clone https://github.com/JustSplash8501/MeatColor.git
    cd MeatColor
 ```
 
