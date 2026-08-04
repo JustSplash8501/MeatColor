@@ -76,51 +76,6 @@ A detailed explanation of the math for converting CIELAB through CIEXYZ to
 sRGB can be found in the
 [conversion formulation](https://github.com/JustSplash8501/MeatColor/blob/master/formulation.md).
 
-## Contributing
-
-Contributions are welcome! To contribute to this package:
-
-Please also review the complete [contribution guide](CONTRIBUTING.md).
-
-1. **Fork the repository** - Click the "Fork" button at the top right of the [GitHub page](https://github.com/JustSplash8501/MeatColor)
-
-2. **Clone your fork** locally:
-```bash
-   git clone https://github.com/JustSplash8501/MeatColor.git
-   cd MeatColor
-```
-
-3. **Create a new branch** for your feature or bug fix:
-```bash
-   git checkout -b my-new-feature
-```
-
-4. **Make your changes** and commit them:
-```bash
-   git add .
-   git commit -m "Add new feature"
-```
-
-5. **Push to your fork**:
-```bash
-   git push origin my-new-feature
-```
-
-6. **Submit a Pull Request** - Go to the original repository and click "New Pull Request"
-
-### Development Guidelines
-
-- Write tests for new functions using `testthat`
-- Document all functions using roxygen2 comments
-- Run `devtools::check()` before submitting to ensure the package builds cleanly
-- Follow the existing code style
-
-### Reporting Issues
-
-Found a bug or have a feature request? Please [open an issue](https://github.com/JustSplash8501/MeatColor/issues) on GitHub.
-
-For questions about using MeatColor, see the [support guide](SUPPORT.md).
-
 ## Code of Conduct
 
 Please note that this project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
