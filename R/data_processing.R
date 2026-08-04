@@ -1,14 +1,3 @@
-#' Convert LAB color values to hexadecimal colors
-#'
-#' @param l L* values
-#' @param a a* values
-#' @param b b* values
-#' @param fixup Logical. If `TRUE`, out-of-gamut colors are corrected to the
-#'   closest displayable sRGB color. Defaults to `FALSE`.
-#'
-#' @return A character vector of hexadecimal colors
-#' @importFrom colorspace hex LAB
-#' @export
 validate_flag <- function(value, name) {
   if (!is.logical(value) || length(value) != 1L || is.na(value)) {
     stop("`", name, "` must be either TRUE or FALSE.", call. = FALSE)
@@ -53,6 +42,17 @@ mean_or_na <- function(x) {
   mean(x, na.rm = TRUE)
 }
 
+#' Convert LAB color values to hexadecimal colors
+#'
+#' @param l L* values
+#' @param a a* values
+#' @param b b* values
+#' @param fixup Logical. If `TRUE`, out-of-gamut colors are corrected to the
+#'   closest displayable sRGB color. Defaults to `FALSE`.
+#'
+#' @return A character vector of hexadecimal colors
+#' @importFrom colorspace hex LAB
+#' @export
 lab_to_hex <- function(l, a, b, fixup = FALSE) {
   validate_flag(fixup, "fixup")
   validate_lab_channels(l, a, b)

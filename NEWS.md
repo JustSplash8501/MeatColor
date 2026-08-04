@@ -1,5 +1,13 @@
 # MeatColor 0.1.0
 
+- Added treatment-aware rows to `plot_lab_colors()` through `group_var`, with
+  explicit detection of ambiguous overlapping observations.
+- Added publication-oriented plot controls for typography, facets, borders,
+  captions, and optional CIELAB or hexadecimal labels while preserving the
+  ability to add ggplot2 layers with `+`.
+- Added vectorized `delta_e_2000()` calculations with CIEDE2000 parametric
+  weighting factors and validation against the Sharma et al. reference data.
+
 ## First release
 
 - Added `lab_to_hex()` to convert CIELAB coordinates to hexadecimal sRGB

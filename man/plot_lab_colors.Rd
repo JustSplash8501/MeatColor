@@ -9,23 +9,95 @@ plot_lab_colors(
   x_var,
   facet_var = NULL,
   x_label = "Time Point",
-  title = "L*a*b* Color Plot"
+  title = "L*a*b* Color Plot",
+  group_var = NULL,
+  group_label = NULL,
+  subtitle = NULL,
+  caption = NULL,
+  facet_ncol = NULL,
+  facet_scales = c("fixed", "free", "free_x", "free_y"),
+  border_color = "black",
+  border_linewidth = 1,
+  base_size = 11,
+  axis_text_size = base_size,
+  title_size = base_size * 1.5,
+  strip_text_size = base_size,
+  show_values = c("none", "hex", "lab", "both"),
+  value_size = 3.5,
+  value_color = "black",
+  na_color = "grey80"
 )
 }
 \arguments{
-\item{data}{Data frame from summarize_lab() or with l_mean, a_mean, b_mean, color columns}
+\item{data}{A data frame from \code{\link[=summarize_lab]{summarize_lab()}} or a data frame containing
+\code{l_mean}, \code{a_mean}, \code{b_mean}, and \code{color} columns.}
 
-\item{x_var}{Column name for x-axis grouping (e.g., "time_point")}
+\item{x_var}{One column name defining the x-axis positions.}
 
-\item{facet_var}{Optional column name for faceting (e.g., "product")}
+\item{facet_var}{An optional column name defining plot facets.}
 
-\item{x_label}{Label for x-axis}
+\item{x_label}{Label for the x-axis.}
 
-\item{title}{Plot title}
+\item{title}{Plot title.}
+
+\item{group_var}{An optional column name defining separate horizontal rows,
+such as treatment. When omitted, each x/facet combination must identify
+at most one row.}
+
+\item{group_label}{Label for the group axis. Defaults to \code{group_var} when a
+group variable is supplied.}
+
+\item{subtitle, caption}{Optional plot subtitle and caption.}
+
+\item{facet_ncol}{Optional positive integer giving the number of facet
+columns.}
+
+\item{facet_scales}{Should facet scales be \code{"fixed"}, \code{"free"},
+\code{"free_x"}, or \code{"free_y"}?}
+
+\item{border_color}{Rectangle border color. Use \code{NA} for no border.}
+
+\item{border_linewidth}{Non-negative rectangle border width.}
+
+\item{base_size}{Base font size supplied to \code{\link[ggplot2:theme_bw]{ggplot2::theme_bw()}}.}
+
+\item{axis_text_size, title_size, strip_text_size}{Font sizes for axis text,
+the plot title, and facet-strip text.}
+
+\item{show_values}{Text to draw inside each rectangle: \code{"none"}, \code{"hex"},
+\code{"lab"}, or \code{"both"}.}
+
+\item{value_size, value_color}{Font size and color for values drawn inside
+rectangles.}
+
+\item{na_color}{Fill color used when \code{color} is missing.}
 }
 \value{
-A ggplot object
+A ggplot object.
 }
 \description{
-Plot LAB color data as colored rectangles
+Creates a treatment-aware color chart from summarized CIELAB measurements.
+The returned object is a regular \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object, so additional
+ggplot2 layers, scales, labels, and themes can be added with \code{+}.
+}
+\examples{
+color_summary <- data.frame(
+  treatment = rep(c("Control", "Aged"), each = 2),
+  day = rep(c("Day 0", "Day 7"), 2),
+  l_mean = c(45, 43, 46, 42),
+  a_mean = c(18, 16, 19, 15),
+  b_mean = c(12, 10, 13, 9)
+)
+color_summary$color <- with(
+  color_summary,
+  lab_to_hex(l_mean, a_mean, b_mean)
+)
+
+plot_lab_colors(
+  color_summary,
+  x_var = "day",
+  group_var = "treatment",
+  show_values = "hex"
+)
+
 }

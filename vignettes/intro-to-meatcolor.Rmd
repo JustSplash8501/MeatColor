@@ -22,10 +22,12 @@ library(ggplot2)
 
 ## Overview
 
-The `MeatColor` package provides tools to visualize L\*a\*b\* colorimeter data commonly used in meat science research. The package includes two main functions:
+The `MeatColor` package provides tools to summarize, compare, and visualize L\*a\*b\* colorimeter data commonly used in meat science research. The package includes four main functions:
 
 - `summarize_lab()`: Summarizes L\*a\*b\* color measurements by grouping variables
 - `plot_lab_colors()`: Creates visual representations of color data as colored rectangles
+- `lab_to_hex()`: Converts CIELAB coordinates to approximate display colors
+- `delta_e_2000()`: Calculates perceptual color differences using CIEDE2000
 
 ## Basic Workflow
 
@@ -83,6 +85,8 @@ plot_lab_colors(
   data = color_summary,
   x_var = "time_point",
   facet_var = "product",
+  group_var = "treatment",
+  group_label = "Treatment",
   x_label = "Storage Duration",
   title = "Meat Color Changes During Storage"
 )
@@ -131,6 +135,7 @@ treatment_summary <- summarize_lab(
 plot_lab_colors(
   data = treatment_summary,
   x_var = "time_point",
+  group_var = "treatment",
   x_label = "Day"
 )
 ```
@@ -142,7 +147,13 @@ Since `plot_lab_colors()` returns a ggplot object, you can add additional layers
 plot_lab_colors(
   data = color_summary,
   x_var = "time_point",
-  facet_var = "treatment"
+  facet_var = "product",
+  group_var = "treatment",
+  subtitle = "Instrumental color by product and treatment",
+  caption = "Rectangles show group means",
+  base_size = 10,
+  border_linewidth = 0.4,
+  show_values = "hex"
 ) +
   labs(caption = "Data from XYZ study, 2024") +
   theme(
@@ -150,6 +161,27 @@ plot_lab_colors(
     strip.background = element_rect(fill = "lightblue")
   )
 ```
+
+### Comparing Colors with CIEDE2000
+
+Use `delta_e_2000()` to quantify the perceptual difference between paired
+CIELAB colors. A result of zero indicates identical coordinates; larger values
+indicate greater color differences.
+
+```{r delta-e}
+delta_e_2000(
+  l1 = 45,
+  a1 = 18,
+  b1 = 12,
+  l2 = c(45, 43, 40),
+  a2 = c(18, 16, 14),
+  b2 = c(12, 11, 9)
+)
+```
+
+The optional `k_l`, `k_c`, and `k_h` arguments control the CIEDE2000
+lightness, chroma, and hue parametric weighting factors. Their defaults are
+the reference-condition value of 1.
 
 ## Interpreting Results
 
@@ -171,6 +203,11 @@ This visualization allows you to quickly see:
 3. **Check your data**: Make sure L\*, a\*, b\* values are in typical ranges (L\*: 0-100, a\* and b\*: typically -60 to +60)
 4. **Export plots**: Use `ggsave()` to save plots for publications
 ```{r save-plot, eval=FALSE}
-p <- plot_lab_colors(color_summary, x_var = "time_point", facet_var = "product")
+p <- plot_lab_colors(
+  color_summary,
+  x_var = "time_point",
+  facet_var = "product",
+  group_var = "treatment"
+)
 ggsave("color_plot.png", p, width = 8, height = 4, dpi = 300)
 ```

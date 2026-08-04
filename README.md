@@ -33,12 +33,28 @@ data_summary <- summarize_lab(
 plot_lab_colors(
   data = data_summary,
   x_var = "time_point",
-  facet_var = "treatment",
+  group_var = "treatment",
   x_label = "Time Point",
   title = "L*a*b* Color Changes Over Time"
 )
 ```
-Of note, `plot_lab_colors()` uses the ggplot2 library to build visuals. Because of this, you can easily alter the aesthetics of the plot to fit your needs.
+`plot_lab_colors()` returns a regular ggplot object, so publication styling can
+be supplied directly or added with ggplot2 functions:
+
+``` r
+plot_lab_colors(
+  data_summary,
+  x_var = "time_point",
+  group_var = "treatment",
+  title = "L*a*b* Color Changes Over Time",
+  subtitle = "Instrumental color by treatment",
+  caption = "Rectangles show mean CIELAB coordinates",
+  base_size = 10,
+  border_linewidth = 0.4,
+  show_values = "hex"
+) +
+  ggplot2::theme(plot.title.position = "plot")
+```
 
 ### Plot preview
 
@@ -50,6 +66,25 @@ Woerner, D. R. (2026). “Extended Beef Wet-Aging Influences on *Biceps
 femoris*, *Gluteus medius* and *Semimembranosus* Palatability.” *Meat and
 Muscle Biology, 10*(1), 22594, 1–19.
 [https://doi.org/10.22175/mmb.22594](https://doi.org/10.22175/mmb.22594)
+
+## CIEDE2000 color differences
+
+Use `delta_e_2000()` to calculate perceptual color differences between paired
+CIELAB measurements. Inputs are vectorized, and a length-one reference color
+can be compared with several samples:
+
+``` r
+delta_e_2000(
+  l1 = 45, a1 = 18, b1 = 12,
+  l2 = c(45, 43, 40),
+  a2 = c(18, 16, 14),
+  b2 = c(12, 11, 9)
+)
+```
+
+The implementation follows Sharma, Wu, and Dalal (2005) and supports the
+CIEDE2000 lightness, chroma, and hue parametric weighting factors.
+[https://doi.org/10.1002/col.20070](https://doi.org/10.1002/col.20070)
 
 ## Interactive teaching app
 

@@ -13,8 +13,9 @@ Authors@R:
 Description: Summarizes CIE L*a*b* (CIELAB) colorimeter measurements across
     experimental groups and converts the resulting coordinates to hexadecimal
     approximations in the standard red, green, and blue (sRGB) color space.
-    Includes plotting tools for comparing measured color across treatments and
-    time points in meat science research.
+    Calculates CIEDE2000 color differences and includes treatment-aware,
+    customizable plotting tools for comparing measured color across treatments
+    and time points in meat science research.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
