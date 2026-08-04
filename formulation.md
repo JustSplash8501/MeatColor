@@ -132,7 +132,7 @@ example below, but the formula above gives the standard sRGB threshold.
 For an in-gamut encoded component $V$:
 
 $$
-C_8 = \operatorname{round}(255V)
+C_8 = \mathrm{round}(255V)
 $$
 
 Each resulting integer is written as a two-digit hexadecimal value and
