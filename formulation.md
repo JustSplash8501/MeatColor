@@ -26,12 +26,12 @@ appropriate conversion before the sRGB matrix is applied.
 
 ## Step 1: Convert CIELAB to CIEXYZ
 
-For CIELAB coordinates \(L^{*}\), \(a^{*}\), and \(b^{*}\), define:
+For CIELAB coordinates $L^{\ast}$, $a^{\ast}$, and $b^{\ast}$, define:
 
 $$
-f_y = \frac{L^{*} + 16}{116}, \qquad
-f_x = f_y + \frac{a^{*}}{500}, \qquad
-f_z = f_y - \frac{b^{*}}{200}
+f_y = \frac{L^{\ast} + 16}{116}, \qquad
+f_x = f_y + \frac{a^{\ast}}{500}, \qquad
+f_z = f_y - \frac{b^{\ast}}{200}
 $$
 
 Use the exact CIELAB constants:
@@ -60,16 +60,16 @@ $$
 x_r = f^{-1}(f_x), \qquad
 y_r =
 \begin{cases}
-f_y^3 & \text{if } L^{*} > 8 \\
-\dfrac{L^{*}}{\kappa} & \text{otherwise}
+f_y^3 & \text{if } L^{\ast} > 8 \\
+\dfrac{L^{\ast}}{\kappa} & \text{otherwise}
 \end{cases},
 \qquad
 z_r = f^{-1}(f_z)
 $$
 
-The boundary \(L^{*}=8\) follows from \(\kappa\epsilon=8\).
+The boundary $L^{\ast}=8$ follows from $\kappa\epsilon=8$.
 
-For the D65 reference white used by `colorspace`, scaled so \(Y_n=100\):
+For the D65 reference white used by `colorspace`, scaled so $Y_n=100$:
 
 $$
 (X_n, Y_n, Z_n) = (95.047,\ 100.000,\ 108.883)
@@ -81,13 +81,13 @@ $$
 X = X_n x_r, \qquad Y = Y_n y_r, \qquad Z = Z_n z_r
 $$
 
-XYZ components are not each restricted to \([0,100]\). In particular, the
-D65 reference-white value \(Z_n\) is greater than 100, and colors outside the
+XYZ components are not each restricted to $[0,100]$. In particular, the
+D65 reference-white value $Z_n$ is greater than 100, and colors outside the
 sRGB gamut can produce values outside the usual display range.
 
 ## Step 2: Convert CIEXYZ to linear-light sRGB
 
-The `colorspace` implementation uses XYZ values scaled to \(Y_n=100\) and the
+The `colorspace` implementation uses XYZ values scaled to $Y_n=100$ and the
 following D65 matrix:
 
 $$
@@ -109,12 +109,12 @@ Z/100
 \end{bmatrix}
 $$
 
-Here \(r\), \(g\), and \(b\) are linear-light components, not yet encoded
+Here $r$, $g$, and $b$ are linear-light components, not yet encoded
 sRGB values.
 
 ## Step 3: Apply the sRGB transfer function
 
-For each linear-light component \(v\), the IEC sRGB encoding function is:
+For each linear-light component $v$, the IEC sRGB encoding function is:
 
 $$
 V =
@@ -130,7 +130,7 @@ example below, but the formula above gives the standard sRGB threshold.
 
 ## Step 4: Quantize and encode as hexadecimal
 
-For an in-gamut encoded component \(V\):
+For an in-gamut encoded component $V$:
 
 $$
 C_8 = \operatorname{round}(255V)
