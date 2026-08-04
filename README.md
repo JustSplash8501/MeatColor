@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/JustSplash8501/MeatColor/actions/workflows/R-CMD-check.yaml/badge.svg?branch=master)](https://github.com/JustSplash8501/MeatColor/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![Version: 0.0.0.9000](https://img.shields.io/badge/version-0.0.0.9000-blue.svg)](https://github.com/JustSplash8501/MeatColor)
+[![Version: 0.1.0](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/JustSplash8501/MeatColor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
@@ -38,15 +38,36 @@ plot_lab_colors(
   title = "L*a*b* Color Changes Over Time"
 )
 ```
-Of note, the `plot_lab_color` uses the ggplot2 library to build visuals. Because of this, you can easily alter the aesthetics of the plot to fit your needs.
+Of note, `plot_lab_colors()` uses the ggplot2 library to build visuals. Because of this, you can easily alter the aesthetics of the plot to fit your needs.
+
+## Interactive teaching app
+
+Use the hosted [LAB Color Explorer](https://0bl00z-secret.shinyapps.io/meatcolor-lab-explorer/)
+as an interactive teaching tool for CIELAB color coordinates. Students can
+adjust each value with a slider or numeric input and immediately compare the
+coordinates with an sRGB color swatch and hexadecimal color code:
+
+- **L\*** represents lightness, from 0 (black) to 100 (white).
+- **a\*** moves from green at negative values to red at positive values.
+- **b\*** moves from blue at negative values to yellow at positive values.
+
+The app also indicates whether the selected color is within the sRGB gamut,
+which helps demonstrate why some CIELAB colors cannot be represented exactly
+on a screen. Displayed colors are sRGB approximations and may vary with the
+display and its calibration. The teaching app is hosted separately; its source
+code is not included in this R package repository.
 
 ## Math Logic
 
-A detailed explanation of the math for converting CIELAB through CIEXYZ to sRGB can be found in [formulation.md](formulation.md).
+A detailed explanation of the math for converting CIELAB through CIEXYZ to
+sRGB can be found in the
+[conversion formulation](https://github.com/JustSplash8501/MeatColor/blob/master/formulation.md).
 
 ## Contributing
 
 Contributions are welcome! To contribute to this package:
+
+Please also review the complete [contribution guide](CONTRIBUTING.md).
 
 1. **Fork the repository** - Click the "Fork" button at the top right of the [GitHub page](https://github.com/JustSplash8501/MeatColor)
 
@@ -84,6 +105,8 @@ Contributions are welcome! To contribute to this package:
 ### Reporting Issues
 
 Found a bug or have a feature request? Please [open an issue](https://github.com/JustSplash8501/MeatColor/issues) on GitHub.
+
+For questions about using MeatColor, see the [support guide](SUPPORT.md).
 
 ## Code of Conduct
 

@@ -49,6 +49,20 @@ test_that("summarize_lab handles NA values correctly", {
   expect_false(any(is.na(result$b_mean)))
 })
 
+test_that("summarize_lab returns explicit missing values for all-NA groups", {
+  all_missing <- data.frame(
+    product = "A",
+    l = NA_real_,
+    a = NA_real_,
+    b = NA_real_
+  )
+
+  expect_no_warning(
+    result <- summarize_lab(all_missing, group_vars = "product")
+  )
+  expect_true(all(is.na(result[c("l_mean", "a_mean", "b_mean", "color")])))
+})
+
 test_that("summarize_lab works with custom column names", {
   test_data_custom <- test_data
   names(test_data_custom)[names(test_data_custom) == "l"] <- "L_star"
@@ -77,6 +91,23 @@ test_that("lab_to_hex converts LAB values to valid hex colors", {
 
   expect_type(result, "character")
   expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", result)))
+})
+
+test_that("lab_to_hex supports scalar channel recycling", {
+  result <- lab_to_hex(l = 50, a = c(-10, 10), b = 0)
+
+  expect_length(result, 2)
+  expect_true(all(grepl("^#[0-9A-Fa-f]{6}$", result)))
+})
+
+test_that("lab_to_hex validates its public arguments", {
+  expect_error(lab_to_hex("50", 0, 0), "must all be numeric")
+  expect_error(lab_to_hex(numeric(), 0, 0), "must not be empty")
+  expect_error(
+    lab_to_hex(1:2, 1:3, 1:2),
+    "equal lengths or be length one"
+  )
+  expect_error(lab_to_hex(50, 0, 0, fixup = NA), "TRUE or FALSE")
 })
 
 test_that("lab_to_hex warns for out-of-gamut colors without fixup", {
@@ -112,5 +143,21 @@ test_that("summarize_lab passes fixup through to color conversion", {
 test_that("summarize_lab errors with missing columns", {
   bad_data <- test_data[, c("product", "treatment")]
 
-  expect_error(summarize_lab(bad_data, group_vars = "product"))
+  expect_error(
+    summarize_lab(bad_data, group_vars = "product"),
+    "Missing required columns: l, a, b"
+  )
+})
+
+test_that("summarize_lab validates data and column arguments", {
+  expect_error(summarize_lab(list(), "product"), "must be a data frame")
+  expect_error(summarize_lab(test_data, NA_character_), "group_vars")
+  expect_error(summarize_lab(test_data, "product", l_col = c("l", "a")), "l_col")
+
+  nonnumeric <- test_data
+  nonnumeric$l <- as.character(nonnumeric$l)
+  expect_error(
+    summarize_lab(nonnumeric, "product"),
+    "LAB measurement columns must be numeric: l"
+  )
 })

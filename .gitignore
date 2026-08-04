@@ -58,8 +58,9 @@ ENV/
 env.bak/
 venv.bak/
 
-# renv (R environment management)
-renv/
+# renv (track shared settings, not the local package library)
+renv/*
+!renv/settings.json
 # Only if renv created it - be careful with this one
 .Rprofile
 .Rproj.user
@@ -84,3 +85,9 @@ inst/doc/
 
 color.png
 /.quarto/
+
+# Local Shiny application and deployment metadata
+/app.R
+/www/
+/rsconnect/
+/app-tests/

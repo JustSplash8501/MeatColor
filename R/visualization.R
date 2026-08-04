@@ -17,20 +17,42 @@ plot_lab_colors <- function(
   x_label = "Time Point",
   title = "L*a*b* Color Plot"
 ) {
-  # Validate required columns (don't check for xmin/xmax/ymin/ymax since we create them)
-  required_cols <- c("l_mean", "a_mean", "b_mean", "color")
-  missing_cols <- setdiff(required_cols, names(data))
-  if (length(missing_cols) > 0) {
-    stop("Missing required columns: ", paste(missing_cols, collapse = ", "))
+  if (!is.data.frame(data)) {
+    stop("`data` must be a data frame.", call. = FALSE)
+  }
+  validate_column_name(x_var, "x_var")
+  if (!is.null(facet_var)) {
+    validate_column_name(facet_var, "facet_var")
   }
 
-  # Prepare plotting data
+  required_cols <- c("l_mean", "a_mean", "b_mean", "color")
+  requested_cols <- c(required_cols, x_var, facet_var)
+  missing_cols <- setdiff(requested_cols, names(data))
+  if (length(missing_cols) > 0) {
+    stop(
+      "Missing required columns: ",
+      paste(missing_cols, collapse = ", "),
+      call. = FALSE
+    )
+  }
+  if (anyNA(data[[x_var]])) {
+    stop("`x_var` must not contain missing values.", call. = FALSE)
+  }
+
+  x_values <- data[[x_var]]
+  if (is.factor(x_values)) {
+    x_levels <- levels(droplevels(x_values))
+  } else {
+    x_levels <- unique(as.character(x_values))
+  }
+
   plot_data <- data |>
     dplyr::mutate(
       ymin = 0.5,
       ymax = 1.5,
-      xmin = as.numeric(as.factor(.data[[x_var]])) - 0.5,
-      xmax = as.numeric(as.factor(.data[[x_var]])) + 0.5
+      x_position = match(as.character(.data[[x_var]]), x_levels),
+      xmin = .data$x_position - 0.5,
+      xmax = .data$x_position + 0.5
     )
 
   # Base plot
@@ -47,8 +69,8 @@ plot_lab_colors <- function(
     ggplot2::geom_rect(color = "black", linewidth = 1) +
     ggplot2::scale_fill_identity() +
     ggplot2::scale_x_continuous(
-      breaks = seq_along(unique(plot_data[[x_var]])),
-      labels = unique(as.character(plot_data[[x_var]])),
+      breaks = seq_along(x_levels),
+      labels = x_levels,
       expand = c(0, 0)
     ) +
     ggplot2::scale_y_continuous(expand = c(0, 0)) +
@@ -67,7 +89,9 @@ plot_lab_colors <- function(
 
   # Add faceting if specified
   if (!is.null(facet_var)) {
-    p <- p + ggplot2::facet_wrap(stats::as.formula(paste("~", facet_var)))
+    p <- p + ggplot2::facet_wrap(
+      ggplot2::vars(!!rlang::sym(facet_var))
+    )
   }
 
   p

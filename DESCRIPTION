@@ -1,13 +1,26 @@
 Package: MeatColor
-Title: Meat Color Analysis - Handling conversion of L*, a*, and b* to Hexcode
-Version: 0.0.0.9000
+Title: Summarize and Visualize CIELAB Color Measurements
+Version: 0.1.0
 Authors@R: 
-    person("Reese", "Wilson", , "Roofrog764@gmail.com", role = c("aut", "cre"))
-Description: Provides functions to summarize and visualize L*a*b* colorimeter 
-    data commonly used in meat science research. The package simplifies the 
-    process of creating color visualization plots from colorimeter measurements.
+    person(
+      "Reese", "Wilson", , "Reese.Wilson@ttu.edu",
+      role = c("aut", "cre", "cph"),
+      comment = c(
+        ORCID = "0009-0006-8510-4467",
+        affiliation = "Department of Animal and Food Sciences, Texas Tech University, Lubbock, Texas 79423, USA"
+      )
+    )
+Description: Summarizes CIE L*a*b* (CIELAB) colorimeter measurements across
+    experimental groups and converts the resulting coordinates to hexadecimal
+    approximations in the standard red, green, and blue (sRGB) color space.
+    Includes plotting tools for comparing measured color across treatments and
+    time points in meat science research.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+URL: https://github.com/JustSplash8501/MeatColor
+BugReports: https://github.com/JustSplash8501/MeatColor/issues
 Roxygen: list(markdown = TRUE)
 Imports: 
     colorspace,

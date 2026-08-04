@@ -86,3 +86,64 @@ test_that("plot_lab_colors handles factor conversion correctly", {
 
   expect_s3_class(p, "ggplot")
 })
+
+test_that("plot_lab_colors keeps positions and labels aligned", {
+  unordered <- test_summary[c(2, 1), ]
+
+  p <- plot_lab_colors(unordered, x_var = "time_point")
+  x_scale <- p$scales$get_scales("x")
+
+  expect_equal(p$data$x_position, c(1L, 2L))
+  expect_equal(x_scale$breaks, 1:2)
+  expect_equal(x_scale$labels, c("2", "1"))
+})
+
+test_that("plot_lab_colors respects explicit factor order", {
+  factored <- test_summary[1:2, ]
+  factored$time_point <- factor(
+    factored$time_point,
+    levels = c("2", "1")
+  )
+
+  p <- plot_lab_colors(factored, x_var = "time_point")
+  x_scale <- p$scales$get_scales("x")
+
+  expect_equal(p$data$x_position, c(2L, 1L))
+  expect_equal(x_scale$labels, c("2", "1"))
+})
+
+test_that("plot_lab_colors validates column selectors", {
+  expect_error(
+    plot_lab_colors(test_summary, x_var = "missing"),
+    "Missing required columns: missing"
+  )
+  expect_error(
+    plot_lab_colors(test_summary, x_var = "time_point", facet_var = "missing"),
+    "Missing required columns: missing"
+  )
+  expect_error(
+    plot_lab_colors(test_summary, x_var = c("time_point", "product")),
+    "x_var"
+  )
+})
+
+test_that("plot_lab_colors does not evaluate facet expressions", {
+  expect_error(
+    plot_lab_colors(
+      test_summary,
+      x_var = "time_point",
+      facet_var = "stop('facet expression executed')"
+    ),
+    "Missing required columns"
+  )
+})
+
+test_that("plot_lab_colors rejects missing x-axis values", {
+  missing_x <- test_summary
+  missing_x$time_point[1] <- NA
+
+  expect_error(
+    plot_lab_colors(missing_x, x_var = "time_point"),
+    "must not contain missing values"
+  )
+})

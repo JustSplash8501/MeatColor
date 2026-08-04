@@ -1,0 +1,13 @@
+# The Shiny teaching app is deployed and managed separately from the R package.
+app.R
+www
+rsconnect
+rsconnect/**
+app-tests
+
+# Local project tooling and generated libraries are not package dependencies.
+packageBuilding.R
+*.Rproj
+renv
+Meta
+doc
