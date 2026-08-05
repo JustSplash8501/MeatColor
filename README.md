@@ -7,7 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-The goal of MeatColor is to simplify the visualization of colorimeter data for research purposes.
+MeatColor simplifies the analysis and visualization of instrumental meat color
+data for research and teaching.
 
 ## Installation
 
