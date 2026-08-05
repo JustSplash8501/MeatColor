@@ -20,11 +20,14 @@ sensitive data with a small synthetic example.
 ## Proposing a change
 
 1. Fork the repository and create a focused branch.
-2. Make the smallest change that addresses the issue.
-3. Add or update tests and documentation.
-4. Run `devtools::document()`, `devtools::test()`, and
-   `devtools::check(args = "--as-cran")`.
-5. Open a pull request describing the motivation, implementation, and any
+2. Restore the project development environment with `renv::restore()`.
+3. Make the smallest change that addresses the issue.
+4. Add or update tests and roxygen2 comments in the relevant `R/*.R` file.
+5. Regenerate documentation with `roxygen2::roxygenise()`; do not edit
+   `NAMESPACE` or files under `man/` directly.
+6. Run `testthat::test_local()` followed by a source-package build and
+   `R CMD check --as-cran`.
+7. Open a pull request describing the motivation, implementation, and any
    scientific or compatibility implications.
 
 Contributions that change numerical behavior should include independently

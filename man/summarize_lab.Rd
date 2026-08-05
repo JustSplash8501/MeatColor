@@ -14,7 +14,8 @@ summarize_lab(
 )
 }
 \arguments{
-\item{data}{A data frame containing LAB color measurements}
+\item{data}{A data frame containing numeric LAB color measurements. LAB
+values must be finite or missing.}
 
 \item{group_vars}{Character vector of column names to group by}
 
@@ -32,4 +33,15 @@ A data frame with mean LAB values and hex colors
 }
 \description{
 Summarize LAB color data
+}
+\examples{
+measurements <- data.frame(
+  treatment = c("control", "control", "treated", "treated"),
+  l = c(44, 46, 48, 50),
+  a = c(16, 14, 13, 11),
+  b = c(10, 12, 9, 11)
+)
+
+measurements |>
+  summarize_lab(group_vars = "treatment")
 }

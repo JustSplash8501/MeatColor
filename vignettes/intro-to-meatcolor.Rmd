@@ -22,12 +22,17 @@ library(ggplot2)
 
 ## Overview
 
-The `MeatColor` package provides tools to summarize, compare, and visualize L\*a\*b\* colorimeter data commonly used in meat science research. The package includes four main functions:
+The `MeatColor` package provides tools to summarize, compare, and visualize L\*a\*b\* colorimeter data commonly used in meat science research. The package includes nine main functions:
 
 - `summarize_lab()`: Summarizes L\*a\*b\* color measurements by grouping variables
 - `plot_lab_colors()`: Creates visual representations of color data as colored rectangles
 - `lab_to_hex()`: Converts CIELAB coordinates to approximate display colors
+- `lab_chroma()`: Calculates CIELAB chroma from a\* and b\* coordinates
+- `lab_hue()`: Calculates CIELAB hue angles from a\* and b\* coordinates
+- `add_lab_metrics()`: Adds hue and chroma columns to a data frame or tibble
 - `delta_e_2000()`: Calculates perceptual color differences using CIEDE2000
+- `myoglobin_int()`: Estimates OMb, DMb, and MMb from MiniScan reflectance
+- `myoglobin_ref()`: Uses calibrated OMb, DMb, and MMb reference spectra
 
 ## Basic Workflow
 
@@ -162,6 +167,36 @@ plot_lab_colors(
   )
 ```
 
+### Calculating Hue and Chroma
+
+Chroma measures distance from the neutral axis, while hue angle describes the
+direction around the a\*–b\* color plane. Both functions are vectorized:
+
+```{r hue-chroma}
+lab_chroma(a = c(18, 12), b = c(12, 8))
+lab_hue(a = c(18, 12), b = c(12, 8))
+```
+
+Use `add_lab_metrics()` to add both values to a data frame and continue directly
+into grouped statistics:
+
+```{r dataframe-hue-chroma}
+metric_summary <- color_data |>
+  add_lab_metrics(a_col = a, b_col = b) |>
+  group_by(product, treatment) |>
+  summarize(
+    mean_chroma = mean(chroma, na.rm = TRUE),
+    mean_hue = mean(hue, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+metric_summary
+```
+
+`lab_hue()` returns degrees by default: 0° is red, 90° is yellow, 180° is
+green, and 270° is blue. Use `degrees = FALSE` for radians. Neutral colors have
+zero chroma and an undefined (`NA`) hue.
+
 ### Comparing Colors with CIEDE2000
 
 Use `delta_e_2000()` to quantify the perceptual difference between paired
@@ -182,6 +217,48 @@ delta_e_2000(
 The optional `k_l`, `k_c`, and `k_h` arguments control the CIEDE2000
 lightness, chroma, and hue parametric weighting factors. Their defaults are
 the reference-condition value of 1.
+
+### Estimating Myoglobin Redox Forms
+
+`myoglobin_int()` accepts MiniScan reflectance measurements at 10 nm intervals
+and appends estimated oxymyoglobin, deoxymyoglobin, and metmyoglobin
+percentages. Specify the reflectance scale explicitly:
+
+```{r myoglobin}
+miniscan_data <- data.frame(
+  sample = "A",
+  R470 = 53.1206, R480 = 53.1206,
+  R520 = 50.1187, R530 = 50.1187,
+  R570 = 45.8142, R580 = 45.8142,
+  R700 = 79.4328
+)
+
+myoglobin_int(miniscan_data, reflectance_scale = "percent")
+```
+
+The function interpolates reflectance at 473, 525, and 572 nm before converting
+the values to reflex attenuance. It uses 700 nm as the reference wavelength
+because that is the upper end of the MiniScan spectral range. Estimates outside
+0–100% are retained with a warning by default so potentially problematic scans
+remain visible to the analyst.
+
+When prepared 100% reference samples are available, use `myoglobin_ref()` for
+the calibrated AMSA K/S method:
+
+```{r myoglobin-reference, eval=FALSE}
+reference_result <- myoglobin_ref(
+  miniscan_data,
+  omb_reference = omb_reference_scans,
+  dmb_reference = dmb_reference_scans,
+  mmb_reference = mmb_reference_scans,
+  reflectance_scale = "percent"
+)
+```
+
+All four data frames must contain the same 470, 480, 520, 530, 570, 580, and
+610 nm columns. Replicate reference scans are summarized after their K/S ratios
+are calculated. The OMb, DMb, and MMb estimates are calibrated independently,
+so their sum is reported but is not forced to equal 100%.
 
 ## Interpreting Results
 

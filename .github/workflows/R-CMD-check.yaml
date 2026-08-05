@@ -43,8 +43,19 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, any::roxygen2
           needs: check
+
+      - name: Verify generated documentation is current
+        if: runner.os == 'Linux' && matrix.config.r == 'release'
+        shell: Rscript {0}
+        run: |
+          roxygen2::roxygenise()
+          changes <- system2("git", c("status", "--porcelain"), stdout = TRUE)
+          if (length(changes)) {
+            writeLines(changes)
+            stop("Run roxygen2::roxygenise() and commit the generated files.")
+          }
 
       - uses: r-lib/actions/check-r-package@v2
         with:

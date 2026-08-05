@@ -26,6 +26,15 @@ validate_lab_channels <- function(l, a, b) {
       call. = FALSE
     )
   }
+
+  invalid_finite <- vapply(
+    channels,
+    function(x) any(!is.finite(x) & !is.na(x)),
+    logical(1)
+  )
+  if (any(invalid_finite)) {
+    stop("`l`, `a`, and `b` must be finite or missing.", call. = FALSE)
+  }
 }
 
 validate_column_name <- function(value, name) {
@@ -44,13 +53,19 @@ mean_or_na <- function(x) {
 
 #' Convert LAB color values to hexadecimal colors
 #'
-#' @param l L* values
-#' @param a a* values
-#' @param b b* values
+#' @param l Numeric L* values. Values must be finite or missing.
+#' @param a Numeric a* values. Values must be finite or missing.
+#' @param b Numeric b* values. Values must be finite or missing.
 #' @param fixup Logical. If `TRUE`, out-of-gamut colors are corrected to the
 #'   closest displayable sRGB color. Defaults to `FALSE`.
 #'
 #' @return A character vector of hexadecimal colors
+#'
+#' @examples
+#' lab_to_hex(l = c(45, 55), a = c(15, 10), b = c(10, -5))
+#'
+#' # Missing coordinates remain missing.
+#' lab_to_hex(l = c(45, NA), a = 15, b = 10)
 #' @importFrom colorspace hex LAB
 #' @export
 lab_to_hex <- function(l, a, b, fixup = FALSE) {
@@ -79,7 +94,8 @@ lab_to_hex <- function(l, a, b, fixup = FALSE) {
 
 #' Summarize LAB color data
 #'
-#' @param data A data frame containing LAB color measurements
+#' @param data A data frame containing numeric LAB color measurements. LAB
+#'   values must be finite or missing.
 #' @param group_vars Character vector of column names to group by
 #' @param l_col Name of the L* column (default "l")
 #' @param a_col Name of the a* column (default "a")
@@ -88,6 +104,17 @@ lab_to_hex <- function(l, a, b, fixup = FALSE) {
 #'   closest displayable sRGB color. Defaults to `FALSE`.
 #'
 #' @return A data frame with mean LAB values and hex colors
+#'
+#' @examples
+#' measurements <- data.frame(
+#'   treatment = c("control", "control", "treated", "treated"),
+#'   l = c(44, 46, 48, 50),
+#'   a = c(16, 14, 13, 11),
+#'   b = c(10, 12, 9, 11)
+#' )
+#'
+#' measurements |>
+#'   summarize_lab(group_vars = "treatment")
 #' @importFrom dplyr group_by summarize mutate
 #' @importFrom colorspace hex LAB
 #' @export
