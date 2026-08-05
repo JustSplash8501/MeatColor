@@ -1,4 +1,4 @@
-# MeatColor 0.1.0
+# MeatColor 0.1.1
 
 - Added treatment-aware rows to `plot_lab_colors()` through `group_var`, with
   explicit detection of ambiguous overlapping observations.

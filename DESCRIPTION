@@ -1,6 +1,6 @@
 Package: MeatColor
 Title: Summarize and Visualize CIELAB Color Measurements
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person(
       "Reese", "Wilson", , "Reese.Wilson@ttu.edu",
