@@ -7,11 +7,11 @@
 lab_to_hex(l, a, b, fixup = FALSE)
 }
 \arguments{
-\item{l}{L* values}
+\item{l}{Numeric L* values. Values must be finite or missing.}
 
-\item{a}{a* values}
+\item{a}{Numeric a* values. Values must be finite or missing.}
 
-\item{b}{b* values}
+\item{b}{Numeric b* values. Values must be finite or missing.}
 
 \item{fixup}{Logical. If \code{TRUE}, out-of-gamut colors are corrected to the
 closest displayable sRGB color. Defaults to \code{FALSE}.}
@@ -21,4 +21,10 @@ A character vector of hexadecimal colors
 }
 \description{
 Convert LAB color values to hexadecimal colors
+}
+\examples{
+lab_to_hex(l = c(45, 55), a = c(15, 10), b = c(10, -5))
+
+# Missing coordinates remain missing.
+lab_to_hex(l = c(45, NA), a = 15, b = 10)
 }

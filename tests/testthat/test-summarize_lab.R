@@ -108,6 +108,18 @@ test_that("lab_to_hex validates its public arguments", {
     "equal lengths or be length one"
   )
   expect_error(lab_to_hex(50, 0, 0, fixup = NA), "TRUE or FALSE")
+  expect_error(lab_to_hex(Inf, 0, 0), "finite or missing")
+  expect_error(lab_to_hex(50, -Inf, 0), "finite or missing")
+})
+
+test_that("summarize_lab rejects infinite measurements", {
+  infinite <- test_data
+  infinite$l[[1]] <- Inf
+
+  expect_error(
+    summarize_lab(infinite, group_vars = "product"),
+    "finite or missing"
+  )
 })
 
 test_that("lab_to_hex warns for out-of-gamut colors without fixup", {

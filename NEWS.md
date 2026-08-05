@@ -7,6 +7,16 @@
   ability to add ggplot2 layers with `+`.
 - Added vectorized `delta_e_2000()` calculations with CIEDE2000 parametric
   weighting factors and validation against the Sharma et al. reference data.
+- Added vectorized `lab_hue()` and `lab_chroma()` calculations plus the
+  pipe-friendly `add_lab_metrics()` data-frame helper.
+- Added `myoglobin_int()` to estimate relative OMb, DMb, and MMb percentages
+  from MiniScan spectral reflectance using the AMSA selected-wavelength method.
+- Added `myoglobin_ref()` to estimate OMb, DMb, and MMb with experiment-specific
+  100% reference spectra and the AMSA calibrated K/S method.
+- Added strict finite-value validation for CIELAB inputs and scale-aware upper
+  bounds for spectral reflectance inputs.
+- Updated myoglobin documentation to distinguish the legacy 2012 473-nm
+  equation from the current 474-nm guidance and added the 2023 AMSA reference.
 
 ## First release
 
