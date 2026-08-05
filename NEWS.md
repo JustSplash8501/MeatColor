@@ -7,12 +7,16 @@
   ability to add ggplot2 layers with `+`.
 - Added vectorized `delta_e_2000()` calculations with CIEDE2000 parametric
   weighting factors and validation against the Sharma et al. reference data.
+- Added `lab_distances()` S3 objects for all-by-all CIEDE2000 comparisons,
+  treatment-level distance summaries, and directly dispatched heatmaps.
 - Added vectorized `lab_hue()` and `lab_chroma()` calculations plus the
   pipe-friendly `add_lab_metrics()` data-frame helper.
 - Added `myoglobin_int()` to estimate relative OMb, DMb, and MMb percentages
   from MiniScan spectral reflectance using the AMSA selected-wavelength method.
 - Added `myoglobin_ref()` to estimate OMb, DMb, and MMb with experiment-specific
   100% reference spectra and the AMSA calibrated K/S method.
+- Added reusable `myoglobin_calibration` S3 objects with `print()`, `predict()`,
+  ratio extraction, and ggplot calibration diagnostics.
 - Added strict finite-value validation for CIELAB inputs and scale-aware upper
   bounds for spectral reflectance inputs.
 - Updated myoglobin documentation to distinguish the legacy 2012 473-nm

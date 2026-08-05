@@ -13,8 +13,9 @@ Authors@R:
 Description: Summarizes CIE L*a*b* (CIELAB) colorimeter measurements across
     experimental groups and converts the resulting coordinates to hexadecimal
     approximations in the standard red, green, and blue (sRGB) color space.
-    Calculates CIELAB hue angles, chroma values, and CIEDE2000 color
-    differences; estimates oxymyoglobin, deoxymyoglobin, and metmyoglobin from
+    Calculates CIELAB hue angles, chroma values, and CIEDE2000 color differences
+    across all sample combinations, with treatment-level summaries and
+    heatmaps; estimates oxymyoglobin, deoxymyoglobin, and metmyoglobin from
     spectral reflectance; and includes treatment-aware, customizable plotting
     tools for comparing measured color across treatments and time points in
     meat science research.
