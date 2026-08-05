@@ -33,6 +33,7 @@ The `MeatColor` package provides tools to summarize, compare, and visualize L\*a
 - `delta_e_2000()`: Calculates perceptual color differences using CIEDE2000
 - `myoglobin_int()`: Estimates OMb, DMb, and MMb from MiniScan reflectance
 - `myoglobin_ref()`: Uses calibrated OMb, DMb, and MMb reference spectra
+- `myoglobin_calibration()`: Creates a reusable calibrated reference object
 
 ## Basic Workflow
 
@@ -199,24 +200,32 @@ zero chroma and an undefined (`NA`) hue.
 
 ### Comparing Colors with CIEDE2000
 
-Use `delta_e_2000()` to quantify the perceptual difference between paired
-CIELAB colors. A result of zero indicates identical coordinates; larger values
-indicate greater color differences.
+Use `lab_distances()` to compare all sample combinations when the experiment
+does not have a reference color. The resulting S3 object preserves the sample
+metadata and can be converted to a numeric matrix, summarized by treatment, or
+plotted directly.
 
 ```{r delta-e}
-delta_e_2000(
-  l1 = 45,
-  a1 = 18,
-  b1 = 12,
-  l2 = c(45, 43, 40),
-  a2 = c(18, 16, 14),
-  b2 = c(12, 11, 9)
+comparison_data <- data.frame(
+  sample_id = paste0("S", 1:6),
+  treatment = rep(c("Control", "Treated"), each = 3),
+  l = c(45, 46, 44, 50, 51, 49),
+  a = c(18, 17, 19, 13, 12, 14),
+  b = c(12, 11, 13, 9, 8, 10)
 )
+
+distances <- lab_distances(comparison_data, sample_id = sample_id)
+as.matrix(distances)
+summarize_treatment_distances(distances, treatment = treatment)
+plot(distances, treatment = treatment)
 ```
 
-The optional `k_l`, `k_c`, and `k_h` arguments control the CIEDE2000
-lightness, chroma, and hue parametric weighting factors. Their defaults are
-the reference-condition value of 1.
+Treatment summaries use each unique pair once, exclude self-comparisons, and
+report the number of complete and missing pairs. `delta_e_2000()` remains the
+lower-level function for intentionally paired colors. The optional `k_l`,
+`k_c`, and `k_h` arguments control the CIEDE2000 lightness, chroma, and hue
+parametric weighting factors; their defaults are the reference-condition value
+of 1.
 
 ### Estimating Myoglobin Redox Forms
 
@@ -242,23 +251,28 @@ because that is the upper end of the MiniScan spectral range. Estimates outside
 0–100% are retained with a warning by default so potentially problematic scans
 remain visible to the analyst.
 
-When prepared 100% reference samples are available, use `myoglobin_ref()` for
-the calibrated AMSA K/S method:
+When prepared 100% reference samples are available, create a reusable S3
+calibration object for the calibrated AMSA K/S method:
 
 ```{r myoglobin-reference, eval=FALSE}
-reference_result <- myoglobin_ref(
-  miniscan_data,
+calibration <- myoglobin_calibration(
   omb_reference = omb_reference_scans,
   dmb_reference = dmb_reference_scans,
   mmb_reference = mmb_reference_scans,
   reflectance_scale = "percent"
 )
+
+reference_result <- predict(calibration, newdata = miniscan_data)
+myoglobin_calibration_ratios(calibration)
+plot(calibration)
 ```
 
 All four data frames must contain the same 470, 480, 520, 530, 570, 580, and
 610 nm columns. Replicate reference scans are summarized after their K/S ratios
 are calculated. The OMb, DMb, and MMb estimates are calibrated independently,
-so their sum is reported but is not forced to equal 100%.
+so their sum is reported but is not forced to equal 100%. The calibration plot
+is a regular ggplot object. `myoglobin_ref()` remains available as a concise
+one-call interface when the references will only be applied once.
 
 ## Interpreting Results
 

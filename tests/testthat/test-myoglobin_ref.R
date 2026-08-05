@@ -32,6 +32,67 @@ make_ks_references <- function(scale = "proportion") {
   )
 }
 
+test_that("myoglobin calibrations are reusable S3 objects", {
+  references <- make_ks_references()
+  calibration <- myoglobin_calibration(
+    references$omb,
+    references$dmb,
+    references$mmb,
+    reflectance_scale = "proportion"
+  )
+
+  expect_s3_class(calibration, "myoglobin_calibration")
+  expect_equal(calibration$reflectance_scale, "proportion")
+  expect_equal(names(calibration$reference_spectra), c("OMb", "DMb", "MMb"))
+  expect_equal(
+    myoglobin_calibration_ratios(calibration)$ratio_610_525,
+    c(0.2, 0.5, 0.8),
+    tolerance = 1e-10
+  )
+  expect_output(print(calibration), "<myoglobin_calibration>", fixed = TRUE)
+})
+
+test_that("predict applies a calibration without separate references", {
+  references <- make_ks_references()
+  calibration <- myoglobin_calibration(
+    references$omb,
+    references$dmb,
+    references$mmb,
+    reflectance_scale = "proportion"
+  )
+  sample <- make_ks_scan(0.675, 0.655, 0.56)
+  sample$sample <- "A"
+
+  result <- predict(calibration, newdata = sample, keep_intermediates = TRUE)
+
+  expect_equal(result$omb_pct, 40, tolerance = 1e-10)
+  expect_equal(result$dmb_pct, 25, tolerance = 1e-10)
+  expect_equal(result$mmb_pct, 35, tolerance = 1e-10)
+  expect_equal(result$sample, "A")
+  expect_true("mb_ratio_610_525" %in% names(result))
+  expect_equal(
+    attr(result, "myoglobin_reference_ratios"),
+    myoglobin_calibration_ratios(calibration)
+  )
+})
+
+test_that("calibration plots are customizable ggplot objects", {
+  references <- make_ks_references()
+  references <- lapply(references, function(reference) rbind(reference, reference))
+  calibration <- myoglobin_calibration(
+    references$omb,
+    references$dmb,
+    references$mmb,
+    reflectance_scale = "proportion"
+  )
+
+  diagnostic <- plot(calibration)
+  expect_s3_class(diagnostic, "ggplot")
+  expect_equal(nrow(diagnostic$data), 9)
+  expect_length(diagnostic$layers, 2)
+  expect_s3_class(plot(calibration, show_replicates = FALSE), "ggplot")
+})
+
 test_that("myoglobin_ref reproduces calibrated K/S equations", {
   references <- make_ks_references()
   sample <- make_ks_scan(0.675, 0.655, 0.56)

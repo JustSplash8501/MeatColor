@@ -125,25 +125,29 @@ names are supported through the wavelength-specific `_col` arguments. By
 default, estimates outside 0–100% are retained with a warning rather than
 silently altered.
 
-For experiments with prepared 100% reference samples, `myoglobin_ref()` uses
-the AMSA calibrated K/S method. Supply separate OMb, DMb, and MMb reference
-data frames collected with the same MiniScan settings and wavelength columns:
+For experiments with prepared 100% reference samples, create a reusable
+`myoglobin_calibration` object from separate OMb, DMb, and MMb reference data
+frames collected with the same MiniScan settings and wavelength columns:
 
 ``` r
-myoglobin_ref(
-  miniscan_data,
+calibration <- myoglobin_calibration(
   omb_reference = omb_reference_scans,
   dmb_reference = dmb_reference_scans,
   mmb_reference = mmb_reference_scans,
   reflectance_scale = "percent"
 )
+
+result <- predict(calibration, newdata = miniscan_data)
+myoglobin_calibration_ratios(calibration)
+plot(calibration)
 ```
 
 Each reference data frame may contain replicate scans; their K/S ratios are
-averaged by default or can be summarized with the median. The calibrated
-estimates are independent and are not forced to sum to 100%. Use
-`attr(result, "myoglobin_reference_ratios")` to inspect the calibration values
-used for a result.
+averaged by default or can be summarized with the median. The calibration plot
+is a regular ggplot object and shows replicate and summarized reference ratios.
+The calibrated estimates are independent and are not forced to sum to 100%.
+The original `myoglobin_ref()` interface remains available when a calibration
+will only be applied once.
 
 The equations implemented by both functions come from the *AMSA Meat Color
 Measurement Guidelines*. `myoglobin_int()` implements the selected-wavelength
@@ -159,21 +163,69 @@ Association. [View the guidelines](https://meatscience.org/docs/default-source/p
 
 ## CIEDE2000 color differences
 
-Use `delta_e_2000()` to calculate perceptual color differences between paired
-CIELAB measurements. Inputs are vectorized, and a length-one reference color
-can be compared with several samples:
+Meat color studies often have no designated reference sample. Use
+`lab_distances()` to calculate CIEDE2000 (Delta E 00) across every sample
+combination instead of manually supplying paired `l1`, `a1`, `b1`, `l2`, `a2`,
+and `b2` vectors. The function returns a `meatcolor_distances` S3 object that
+keeps the symmetric distance matrix, original sample metadata, sample-ID
+mapping, CIELAB column mapping, and CIEDE2000 weighting factors together:
 
 ``` r
-delta_e_2000(
-  l1 = 45, a1 = 18, b1 = 12,
-  l2 = c(45, 43, 40),
-  a2 = c(18, 16, 14),
-  b2 = c(12, 11, 9)
+samples <- data.frame(
+  sample_id = paste0("S", 1:6),
+  treatment = rep(c("Control", "Treated"), each = 3),
+  l = c(45, 46, 44, 50, 51, 49),
+  a = c(18, 17, 19, 13, 12, 14),
+  b = c(12, 11, 13, 9, 8, 10)
+)
+
+distances <- lab_distances(samples, sample_id = sample_id)
+
+# Extract the symmetric sample-by-sample matrix.
+as.matrix(distances)
+
+# Average unique sample pairs within and between treatments.
+summarize_treatment_distances(distances, treatment = treatment)
+
+# Create a treatment-level heatmap.
+heatmap <- plot(distances, treatment = treatment)
+```
+
+Treatment summaries contain the mean and standard deviation of Delta E 00,
+the number of usable sample pairs, and the number of missing comparisons.
+Within-treatment values use comparisons between different samples;
+self-comparisons, the duplicated lower triangle, and duplicate A-B/B-A
+treatment combinations are excluded.
+
+`plot()` dispatches to MeatColor's S3 method and returns a regular ggplot
+object—not a base-R graphic—so it can be customized normally:
+
+``` r
+heatmap +
+  ggplot2::labs(
+    title = "Mean Color Dissimilarity Between Treatments",
+    subtitle = "CIEDE2000 distance across unique sample combinations"
+  ) +
+  ggplot2::scale_fill_viridis_c(option = "magma") +
+  ggplot2::theme_minimal()
+```
+
+An existing symmetric matrix can also be combined with a separate sample
+metadata table:
+
+``` r
+plot_treatment_distances(
+  as.matrix(distances),
+  treatment = treatment,
+  metadata = samples,
+  sample_id = sample_id
 )
 ```
 
-The implementation follows Sharma, Wu, and Dalal (2005) and supports the
-CIEDE2000 lightness, chroma, and hue parametric weighting factors.
+The lower-level `delta_e_2000()` function remains available when colors are
+deliberately paired or a true reference color exists. Both interfaces support
+the CIEDE2000 lightness, chroma, and hue parametric weighting factors. The
+implementation follows Sharma, Wu, and Dalal (2005).
 [https://doi.org/10.1002/col.20070](https://doi.org/10.1002/col.20070)
 
 ## Interactive teaching app
