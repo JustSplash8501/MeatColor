@@ -1,0 +1,62 @@
+name: Feature request
+description: Suggest an improvement or new capability for MeatColor
+title: "[Feature]: "
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement. For changes to numerical behavior, identify the applicable scientific standard or reference when possible.
+
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing issues
+      description: Check the issue tracker before submitting a new request.
+      options:
+        - label: I searched the existing issues and did not find a duplicate.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Describe the research, teaching, or analysis need this feature would address.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or interface you would like MeatColor to provide.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any workarounds or alternative approaches you have considered.
+
+  - type: textarea
+    id: scientific-reference
+    attributes:
+      label: Scientific standard or reference
+      description: If the request changes calculations or interpretation, provide a standard, publication, or independently verifiable reference.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add examples, sketches, or other information that would help explain the request.
+
+  - type: checkboxes
+    id: code-of-conduct
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

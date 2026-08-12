@@ -1,0 +1,94 @@
+name: Bug report
+description: Report a reproducible problem with MeatColor
+title: "[Bug]: "
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve MeatColor. Please do not include confidential research data or personal information.
+
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing issues
+      description: Check the issue tracker before submitting a new report.
+      options:
+        - label: I searched the existing issues and did not find a duplicate.
+          required: true
+
+  - type: input
+    id: meatcolor-version
+    attributes:
+      label: MeatColor version
+      description: Run `packageVersion("MeatColor")` if you are unsure.
+      placeholder: 0.1.1
+    validations:
+      required: true
+
+  - type: input
+    id: r-version
+    attributes:
+      label: R version
+      description: Run `R.version.string` to find your R version.
+      placeholder: R version 4.5.0
+    validations:
+      required: true
+
+  - type: input
+    id: operating-system
+    attributes:
+      label: Operating system
+      placeholder: macOS 15, Ubuntu 24.04, or Windows 11
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description
+      description: Explain what happened and how it affects your work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducible-example
+    attributes:
+      label: Minimal reproducible example
+      description: Provide the smallest self-contained R example that reproduces the problem. Use synthetic data when the original data are confidential.
+      render: r
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: colorimeter-settings
+    attributes:
+      label: Colorimeter settings
+      description: When relevant, include the instrument, color space, illuminant, observer angle, reflectance scale, and other applicable settings.
+
+  - type: textarea
+    id: session-info
+    attributes:
+      label: Session information
+      description: Paste the output of `sessionInfo()` below.
+      render: text
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: code-of-conduct
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

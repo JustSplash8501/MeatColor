@@ -39,7 +39,7 @@ the project's MIT license.
 ## Code of Conduct
 
 Participation in this project is governed by the
-[Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+[Contributor Covenant, version 2.1](CODE_OF_CONDUCT.md).
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported privately using the maintainer email listed in the package
 `DESCRIPTION` file.
