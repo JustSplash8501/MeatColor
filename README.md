@@ -7,59 +7,101 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-MeatColor simplifies the analysis and visualization of instrumental meat color
-data for research and teaching.
+MeatColor is an R package for turning instrumental meat-color measurements
+into analysis-ready summaries, interpretable comparisons, and
+publication-ready graphics. It works with CIE L\*a\*b\* colorimeter data and
+spectral reflectance measurements, bringing common meat-science calculations
+into one reproducible workflow.
+
+Instrumental color data are easy to collect but often tedious to analyze.
+Researchers must summarize repeated measurements, convert coordinates into
+meaningful color metrics, compare treatments, apply specialized myoglobin
+equations, and build figures—usually with separate formulas and scripts.
+MeatColor connects those steps while keeping the data in ordinary R data
+frames and returning plots that can be customized with ggplot2.
+
+## Why MeatColor?
+
+- **Built for meat-color experiments.** Group measurements by treatment,
+  product, storage time, or other experimental factors.
+- **More than L\*a\*b\* averages.** Calculate hue, chroma, CIEDE2000 color
+  differences, and surface myoglobin redox-form estimates.
+- **Treatment-aware comparisons.** Compare every sample pair, summarize
+  within- and between-treatment distances, and visualize the results.
+- **Transparent scientific behavior.** Input scales and out-of-range handling
+  are explicit; questionable estimates are not silently hidden.
+- **Fits existing R workflows.** Functions accept data frames, support tidy
+  column selection where appropriate, and return regular data frames or
+  ggplot objects.
+
+## At a glance
+
+| Research task | Main functions | Result |
+|---|---|---|
+| Summarize and display instrumental color | `summarize_lab()`, `plot_lab_colors()` | Treatment-level L\*a\*b\* summaries and color charts |
+| Calculate color attributes | `lab_chroma()`, `lab_hue()`, `add_lab_metrics()` | Chroma and hue-angle variables |
+| Approximate measured color on screen | `lab_to_hex()` | CIELAB-to-sRGB hexadecimal approximations |
+| Quantify perceptual color differences | `delta_e_2000()`, `lab_distances()` | Paired or all-pairs CIEDE2000 distances |
+| Compare treatments | `summarize_treatment_distances()`, `plot_treatment_distances()` | Treatment summaries and heatmaps |
+| Estimate myoglobin redox forms | `myoglobin_int()`, `myoglobin_ref()` | OMb, DMb, and MMb estimates from reflectance |
+| Reuse prepared-reference calibrations | `myoglobin_calibration()`, `predict()` | Validated calibration objects and predictions |
 
 ## Installation
 
-You can install the development version of MeatColor from [GitHub](https://github.com/JustSplash8501/MeatColor) with:
+MeatColor requires R 4.1.0 or later. Install the development version from
+GitHub with:
+
 ``` r
 # install.packages("pak")
 pak::pak("JustSplash8501/MeatColor")
 ```
 
-## Example
+## Quick start
 
-An example of how to use the functions in this package:
+Start with a data frame containing L\*, a\*, and b\* measurements plus the
+variables that define the experiment:
+
 ``` r
 library(MeatColor)
 
-# Summarize LAB color data by grouping variables
-data_summary <- summarize_lab(
-  data = my_colorimeter_data,
-  group_vars = c("treatment", "time_point")
+measurements <- data.frame(
+  sample = paste0("S", 1:8),
+  treatment = rep(c("Control", "Aged"), each = 4),
+  day = rep(c("Day 0", "Day 7"), each = 2, times = 2),
+  l = c(45.2, 44.8, 42.1, 41.9, 46.1, 45.9, 43.2, 42.8),
+  a = c(18.5, 18.8, 16.2, 16.5, 17.9, 18.1, 15.8, 16.1),
+  b = c(12.1, 12.3, 10.5, 10.7, 11.8, 12.0, 10.3, 10.5)
 )
 
-# Create visualization
+color_summary <- summarize_lab(
+  measurements,
+  group_vars = c("treatment", "day")
+)
+
 plot_lab_colors(
-  data = data_summary,
-  x_var = "time_point",
+  color_summary,
+  x_var = "day",
   group_var = "treatment",
-  x_label = "Time Point",
-  title = "L*a*b* Color Changes Over Time"
+  x_label = "Storage time",
+  group_label = "Treatment",
+  title = "Instrumental meat color over time",
+  show_values = "lab"
 )
 ```
-`plot_lab_colors()` returns a regular ggplot object, so publication styling can
-be supplied directly or added with ggplot2 functions:
 
-``` r
-plot_lab_colors(
-  data_summary,
-  x_var = "time_point",
-  group_var = "treatment",
-  title = "L*a*b* Color Changes Over Time",
-  subtitle = "Instrumental color by treatment",
-  caption = "Rectangles show mean CIELAB coordinates",
-  base_size = 10,
-  border_linewidth = 0.4,
-  show_values = "hex"
-) +
-  ggplot2::theme(plot.title.position = "plot")
-```
+`summarize_lab()` calculates group means and display-color approximations.
+`plot_lab_colors()` turns those results into a treatment-aware chart and
+returns a regular ggplot object, so themes, labels, scales, and other ggplot2
+layers can be added normally.
 
-### Plot preview
+### What the workflow can produce
 
 ![Example L*a*b* color plot across wet-aging durations](man/figures/mmb-plot.png)
+
+This figure shows instrumental color across wet-aging durations in a published
+beef study. It illustrates how MeatColor can make changes among treatments and
+time points visually comparable while retaining the underlying quantitative
+measurements.
 
 *Source:* Main, A. J., Frink, L. M., Hernandez, M. S., O'Quinn, T. G.,
 Legako, J. F., Miller, R. K., Nair, M. N., Kerth, C. R., Lancaster, J. M., &
@@ -68,67 +110,46 @@ femoris*, *Gluteus medius* and *Semimembranosus* Palatability.” *Meat and
 Muscle Biology, 10*(1), 22594, 1–19.
 [https://doi.org/10.22175/mmb.22594](https://doi.org/10.22175/mmb.22594)
 
-## Hue and chroma
+## Compare samples and treatments
 
-Use `lab_chroma()` and `lab_hue()` to calculate CIELAB chroma and hue angle
-directly from a\* and b\* coordinates:
-
-``` r
-lab_chroma(a = c(18, 12), b = c(12, 8))
-lab_hue(a = c(18, 12), b = c(12, 8))
-```
-
-For a data frame, `add_lab_metrics()` adds both columns and fits directly into
-a dplyr pipeline:
+CIELAB coordinates can look different without revealing how large that
+difference is perceptually. `lab_distances()` calculates CIEDE2000 (Delta E 00)
+for every sample pair, without requiring a designated reference sample:
 
 ``` r
-metric_summary <- my_colorimeter_data |>
-  add_lab_metrics(a_col = a, b_col = b) |>
-  dplyr::group_by(treatment, time_point) |>
-  dplyr::summarise(
-    mean_chroma = mean(chroma, na.rm = TRUE),
-    mean_hue = mean(hue, na.rm = TRUE),
-    .groups = "drop"
-  )
-```
+distances <- lab_distances(measurements, sample_id = sample)
 
-Quoted column names and custom output names are also supported with `a_col`,
-`b_col`, `chroma_col`, and `hue_col`.
+# Symmetric sample-by-sample matrix
+as.matrix(distances)
 
-Chroma describes the distance from the neutral axis, so larger values indicate
-more saturated colors. Hue is returned in degrees from 0 (inclusive) to 360
-(exclusive): 0° is red, 90° is yellow, 180° is green, and 270° is blue. A
-neutral color (`a* = 0`, `b* = 0`) has zero chroma and an undefined (`NA`) hue.
-Set `degrees = FALSE` in `lab_hue()` to return radians instead.
-
-## Myoglobin redox forms
-
-Use `myoglobin_int()` with MiniScan reflectance values to estimate the relative
-percentages of oxymyoglobin (OMb), deoxymyoglobin (DMb), and metmyoglobin
-(MMb). The function interpolates the required 473, 525, and 572 nm values from
-the instrument's 10 nm spectral output and uses 700 nm as the reference:
-
-``` r
-miniscan_data <- data.frame(
-  sample = "A",
-  R470 = 53.1206, R480 = 53.1206,
-  R520 = 50.1187, R530 = 50.1187,
-  R570 = 45.8142, R580 = 45.8142,
-  R700 = 79.4328
+# Unique within- and between-treatment comparisons
+treatment_distances <- summarize_treatment_distances(
+  distances,
+  treatment = treatment
 )
 
-myoglobin_int(miniscan_data, reflectance_scale = "percent")
+# Treatment-level CIEDE2000 heatmap
+plot(distances, treatment = treatment)
 ```
 
-The input data are retained and `omb_pct`, `dmb_pct`, and `mmb_pct` are
-appended, so the result can continue through a dplyr pipeline. Custom column
-names are supported through the wavelength-specific `_col` arguments. By
-default, estimates outside 0–100% are retained with a warning rather than
-silently altered.
+Self-comparisons and duplicate A–B/B–A combinations are excluded from
+treatment summaries. The lower-level `delta_e_2000()` function remains
+available when colors are deliberately paired or a true reference color
+exists.
 
-For experiments with prepared 100% reference samples, create a reusable
-`myoglobin_calibration` object from separate OMb, DMb, and MMb reference data
-frames collected with the same MiniScan settings and wavelength columns:
+## Estimate myoglobin redox forms
+
+MeatColor supports two reflectance-based approaches for estimating relative
+oxymyoglobin (OMb), deoxymyoglobin (DMb), and metmyoglobin (MMb):
+
+1. `myoglobin_int()` applies the selected-wavelength reflex-attenuance
+   equations to MiniScan reflectance data.
+2. `myoglobin_ref()` applies calibrated K/S equations using experimentally
+   prepared 100% OMb, DMb, and MMb reference spectra.
+
+For studies that repeatedly use the same prepared references,
+`myoglobin_calibration()` creates a validated object that can be applied to
+multiple sample data sets with `predict()`:
 
 ``` r
 calibration <- myoglobin_calibration(
@@ -138,103 +159,46 @@ calibration <- myoglobin_calibration(
   reflectance_scale = "percent"
 )
 
-result <- predict(calibration, newdata = miniscan_data)
-myoglobin_calibration_ratios(calibration)
+myoglobin_results <- predict(calibration, newdata = sample_scans)
 plot(calibration)
 ```
 
-Each reference data frame may contain replicate scans; their K/S ratios are
-averaged by default or can be summarized with the median. The calibration plot
-is a regular ggplot object and shows replicate and summarized reference ratios.
-The calibrated estimates are independent and are not forced to sum to 100%.
-The original `myoglobin_ref()` interface remains available when a calibration
-will only be applied once.
+Reference scans and study samples should be collected with the same product,
+instrument settings, standardization, and experimental conditions. Estimates
+outside 0–100% are retained with a warning by default rather than silently
+altered.
 
-The equations implemented by both functions come from the *AMSA Meat Color
-Measurement Guidelines*. `myoglobin_int()` implements the selected-wavelength
-reflex-attenuance equations described by AMSA for estimating MMb and DMb and
-calculating OMb by difference. `myoglobin_ref()` implements the AMSA calibrated
-K/S isobestic-wavelength equations, which require experimentally prepared 100%
-OMb, DMb, and MMb reference spectra specific to the product, instrument, and
-experimental conditions.
+## Scientific basis and interpretation
 
-*Reference:* American Meat Science Association. (2012). *AMSA Meat Color
-Measurement Guidelines* (revised December 2012). American Meat Science
-Association. [View the guidelines](https://meatscience.org/docs/default-source/publications-resources/hot-topics/2012_12_meat_clr_guide.pdf?sfvrsn=d818b8b3_0).
+MeatColor implements established color-science methods while making important
+assumptions visible to the analyst:
 
-## CIEDE2000 color differences
+- **CIELAB display colors are approximations.** Physical L\*a\*b\* measurements
+  are converted to sRGB for visualization; some measured colors fall outside
+  the displayable sRGB gamut.
+- **Color differences use CIEDE2000.** The implementation follows Sharma, Wu,
+  and Dalal (2005), with configurable lightness, chroma, and hue weighting
+  factors. [https://doi.org/10.1002/col.20070](https://doi.org/10.1002/col.20070)
+- **Myoglobin calculations follow AMSA guidance.** The package implements both
+  selected-wavelength and prepared-reference approaches described in the
+  *AMSA Meat Color Measurement Guidelines*.
 
-Meat color studies often have no designated reference sample. Use
-`lab_distances()` to calculate CIEDE2000 (Delta E 00) across every sample
-combination instead of manually supplying paired `l1`, `a1`, `b1`, `l2`, `a2`,
-and `b2` vectors. The function returns a `meatcolor_distances` S3 object that
-keeps the symmetric distance matrix, original sample metadata, sample-ID
-mapping, CIELAB column mapping, and CIEDE2000 weighting factors together:
+See the [conversion formulation](formulation.md) for the CIELAB-to-CIEXYZ-to-
+sRGB mathematics. Researchers remain responsible for choosing a method and
+instrument configuration appropriate to their product and study design.
 
-``` r
-samples <- data.frame(
-  sample_id = paste0("S", 1:6),
-  treatment = rep(c("Control", "Treated"), each = 3),
-  l = c(45, 46, 44, 50, 51, 49),
-  a = c(18, 17, 19, 13, 12, 14),
-  b = c(12, 11, 13, 9, 8, 10)
-)
+*References:* American Meat Science Association. (2012). *Meat Color
+Measurement Guidelines* (revised December 2012).
+[View the guidelines](https://meatscience.org/docs/default-source/publications-resources/hot-topics/2012_12_meat_clr_guide.pdf?sfvrsn=d818b8b3_0).
+King, D. A., et al. (2023). “American Meat Science Association Guidelines for
+Meat Color Measurement.” *Meat and Muscle Biology, 6*(4), 1–81.
+[https://doi.org/10.22175/mmb.12473](https://doi.org/10.22175/mmb.12473)
 
-distances <- lab_distances(samples, sample_id = sample_id)
+## Teach and explore CIELAB color
 
-# Extract the symmetric sample-by-sample matrix.
-as.matrix(distances)
-
-# Average unique sample pairs within and between treatments.
-summarize_treatment_distances(distances, treatment = treatment)
-
-# Create a treatment-level heatmap.
-heatmap <- plot(distances, treatment = treatment)
-```
-
-Treatment summaries contain the mean and standard deviation of Delta E 00,
-the number of usable sample pairs, and the number of missing comparisons.
-Within-treatment values use comparisons between different samples;
-self-comparisons, the duplicated lower triangle, and duplicate A-B/B-A
-treatment combinations are excluded.
-
-`plot()` dispatches to MeatColor's S3 method and returns a regular ggplot
-object—not a base-R graphic—so it can be customized normally:
-
-``` r
-heatmap +
-  ggplot2::labs(
-    title = "Mean Color Dissimilarity Between Treatments",
-    subtitle = "CIEDE2000 distance across unique sample combinations"
-  ) +
-  ggplot2::scale_fill_viridis_c(option = "magma") +
-  ggplot2::theme_minimal()
-```
-
-An existing symmetric matrix can also be combined with a separate sample
-metadata table:
-
-``` r
-plot_treatment_distances(
-  as.matrix(distances),
-  treatment = treatment,
-  metadata = samples,
-  sample_id = sample_id
-)
-```
-
-The lower-level `delta_e_2000()` function remains available when colors are
-deliberately paired or a true reference color exists. Both interfaces support
-the CIEDE2000 lightness, chroma, and hue parametric weighting factors. The
-implementation follows Sharma, Wu, and Dalal (2005).
-[https://doi.org/10.1002/col.20070](https://doi.org/10.1002/col.20070)
-
-## Interactive teaching app
-
-Use the hosted [LAB Color Explorer](https://0bl00z-secret.shinyapps.io/meatcolor-lab-explorer/)
-as an interactive teaching tool for CIELAB color coordinates. Students can
-adjust each value with a slider or numeric input and immediately compare the
-coordinates with an sRGB color swatch and hexadecimal color code:
+The hosted [LAB Color Explorer](https://0bl00z-secret.shinyapps.io/meatcolor-lab-explorer/)
+helps students connect L\*, a\*, and b\* coordinates with an approximate screen
+color. Sliders and numeric inputs make each axis immediately visible:
 
 - **L\*** represents lightness, from 0 (black) to 100 (white).
 - **a\*** moves from green at negative values to red at positive values.
@@ -242,18 +206,24 @@ coordinates with an sRGB color swatch and hexadecimal color code:
 
 ![LAB Color Explorer interactive teaching app](man/figures/lab-color-explorer.png)
 
-The app also indicates whether the selected color is within the sRGB gamut,
-which helps demonstrate why some CIELAB colors cannot be represented exactly
-on a screen. Displayed colors are sRGB approximations and may vary with the
-display and its calibration. The teaching app is hosted separately; its source
-code is not included in this R package repository.
+The explorer also identifies out-of-gamut colors, demonstrating why some
+physical CIELAB measurements cannot be represented exactly on a screen. The
+teaching app is hosted separately; its source code is not part of this package.
 
-## Math Logic
+## Documentation and support
 
-A detailed explanation of the math for converting CIELAB through CIEXYZ to
-sRGB can be found in the
-[conversion formulation](https://github.com/JustSplash8501/MeatColor/blob/master/formulation.md).
+- Start with the [introductory vignette](vignettes/intro-to-meatcolor.Rmd) for
+  a fuller analysis workflow.
+- Use `help(package = "MeatColor")` or `?function_name` for function-level
+  documentation.
+- Report reproducible problems through the
+  [issue tracker](https://github.com/JustSplash8501/MeatColor/issues).
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing substantial changes.
+
+MeatColor is currently experimental. Interfaces may evolve as the package is
+tested across more instruments, products, and study designs.
 
 ## Code of Conduct
 
-Please note that this project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+Participation in this project is governed by the
+[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
