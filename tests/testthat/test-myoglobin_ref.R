@@ -52,6 +52,98 @@ test_that("myoglobin calibrations are reusable S3 objects", {
   expect_output(print(calibration), "<myoglobin_calibration>", fixed = TRUE)
 })
 
+test_that("a combined reference table creates the same calibration", {
+  references <- make_ks_references()
+  combined <- rbind(
+    transform(references$omb, form = "OMb"),
+    transform(references$dmb, form = "DMb"),
+    transform(references$mmb, form = "MMb")
+  )
+
+  separate <- myoglobin_calibration(
+    references$omb,
+    references$dmb,
+    references$mmb,
+    reflectance_scale = "proportion"
+  )
+  combined_calibration <- myoglobin_calibration(
+    reference_data = combined,
+    form_col = form,
+    reflectance_scale = "proportion"
+  )
+
+  expect_s3_class(combined_calibration, "myoglobin_calibration")
+  expect_equal(
+    myoglobin_calibration_ratios(combined_calibration),
+    myoglobin_calibration_ratios(separate)
+  )
+  expect_equal(
+    vapply(combined_calibration$reference_spectra, nrow, integer(1)),
+    c(OMb = 1L, DMb = 1L, MMb = 1L)
+  )
+})
+
+test_that("combined reference tables support quoted columns and custom labels", {
+  references <- make_ks_references()
+  combined <- rbind(
+    transform(references$omb, pigment = "oxy"),
+    transform(references$dmb, pigment = "deoxy"),
+    transform(references$mmb, pigment = "met")
+  )
+
+  calibration <- myoglobin_calibration(
+    reference_data = combined,
+    form_col = "pigment",
+    form_values = c(OMb = "oxy", DMb = "deoxy", MMb = "met"),
+    reflectance_scale = "proportion"
+  )
+
+  expect_equal(
+    myoglobin_calibration_ratios(calibration)$ratio_610_525,
+    c(0.2, 0.5, 0.8),
+    tolerance = 1e-10
+  )
+})
+
+test_that("combined reference inputs are validated clearly", {
+  references <- make_ks_references()
+  combined <- rbind(
+    transform(references$omb, form = "OMb"),
+    transform(references$dmb, form = "DMb")
+  )
+
+  expect_error(
+    myoglobin_calibration(reference_data = combined),
+    "form_col.*required"
+  )
+  expect_error(
+    myoglobin_calibration(
+      omb_reference = references$omb,
+      reference_data = combined,
+      form_col = form
+    ),
+    "not both"
+  )
+  expect_error(
+    myoglobin_calibration(
+      reference_data = combined,
+      form_col = form,
+      reflectance_scale = "proportion"
+    ),
+    "Missing reference forms: MMb"
+  )
+
+  unexpected <- transform(combined, form = replace(form, 1, "unknown"))
+  expect_error(
+    myoglobin_calibration(
+      reference_data = unexpected,
+      form_col = form,
+      reflectance_scale = "proportion"
+    ),
+    "Unexpected reference form values: unknown"
+  )
+})
+
 test_that("predict applies a calibration without separate references", {
   references <- make_ks_references()
   calibration <- myoglobin_calibration(

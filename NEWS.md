@@ -1,4 +1,6 @@
-# MeatColor 0.1.1
+# MeatColor 0.2.0
+
+This is the first formal release of MeatColor.
 
 - Added treatment-aware rows to `plot_lab_colors()` through `group_var`, with
   explicit detection of ambiguous overlapping observations.
@@ -17,6 +19,8 @@
   100% reference spectra and the AMSA calibrated K/S method.
 - Added reusable `myoglobin_calibration` S3 objects with `print()`, `predict()`,
   ratio extraction, and ggplot calibration diagnostics.
+- `myoglobin_calibration()` now accepts a single reference table with a form
+  column, including configurable labels for OMb, DMb, and MMb.
 - Added strict finite-value validation for CIELAB inputs and scale-aware upper
   bounds for spectral reflectance inputs.
 - Updated myoglobin documentation to distinguish the legacy 2012 473-nm

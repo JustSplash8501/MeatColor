@@ -6,9 +6,9 @@
 \title{Create a reusable myoglobin reference calibration}
 \usage{
 myoglobin_calibration(
-  omb_reference,
-  dmb_reference,
-  mmb_reference,
+  omb_reference = NULL,
+  dmb_reference = NULL,
+  mmb_reference = NULL,
   r470_col = "R470",
   r480_col = "R480",
   r520_col = "R520",
@@ -17,15 +17,19 @@ myoglobin_calibration(
   r580_col = "R580",
   r610_col = "R610",
   reflectance_scale = c("percent", "proportion"),
-  reference_summary = c("mean", "median")
+  reference_summary = c("mean", "median"),
+  reference_data = NULL,
+  form_col = NULL,
+  form_values = c(OMb = "OMb", DMb = "DMb", MMb = "MMb")
 )
 
 \method{print}{myoglobin_calibration}(x, ...)
 }
 \arguments{
-\item{omb_reference, dmb_reference, mmb_reference}{Data frames containing one
-or more replicate spectra for prepared 100 percent OMb, DMb, and MMb
-references.}
+\item{omb_reference, dmb_reference, mmb_reference}{Optional data frames
+containing one or more replicate spectra for prepared 100 percent OMb,
+DMb, and MMb references. Supply all three, or use \code{reference_data} and
+\code{form_col} instead.}
 
 \item{r470_col, r480_col, r520_col, r530_col, r570_col, r580_col, r610_col}{Names
 of the reflectance columns at the indicated wavelengths.}
@@ -35,6 +39,15 @@ sample spectra: \code{"percent"} or \code{"proportion"}.}
 
 \item{reference_summary}{Function used to combine replicate reference
 ratios: \code{"mean"} or \code{"median"}.}
+
+\item{reference_data}{Optional single data frame containing all OMb, DMb,
+and MMb reference spectra.}
+
+\item{form_col}{Unquoted or quoted name of the column in \code{reference_data}
+identifying the myoglobin form.}
+
+\item{form_values}{Named character vector mapping the canonical names
+\code{OMb}, \code{DMb}, and \code{MMb} to values in \code{form_col}.}
 
 \item{x}{A \code{myoglobin_calibration} object.}
 
@@ -63,5 +76,16 @@ calibration <- myoglobin_calibration(
   reflectance_scale = "percent"
 )
 calibration
+
+combined_references <- rbind(
+  transform(reference, form = "OMb", R610 = 45),
+  transform(reference, form = "DMb", R470 = 30, R480 = 30),
+  transform(reference, form = "MMb", R570 = 40, R580 = 40)
+)
+myoglobin_calibration(
+  reference_data = combined_references,
+  form_col = form,
+  reflectance_scale = "percent"
+)
 
 }

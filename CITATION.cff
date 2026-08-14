@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use MeatColor, please cite the software using the metadata below."
+type: software
+title: "MeatColor: Summarize and Visualize CIELAB Color Measurements"
+version: 0.2.0
+date-released: 2026-08-14
+authors:
+  - given-names: Reese
+    family-names: Wilson
+    email: ReeseAWilson02@gmail.com
+    orcid: "https://orcid.org/0009-0006-8510-4467"
+abstract: >-
+  An R package for summarizing, comparing, and visualizing instrumental meat-color
+  measurements, including CIELAB metrics, CIEDE2000 color differences, and
+  reflectance-based estimates of myoglobin redox forms.
+keywords:
+  - R package
+  - meat color
+  - CIELAB
+  - CIEDE2000
+  - myoglobin
+  - color science
+license: MIT
+repository-code: "https://github.com/JustSplash8501/MeatColor"
+url: "https://github.com/JustSplash8501/MeatColor"

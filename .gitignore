@@ -86,8 +86,5 @@ inst/doc/
 color.png
 /.quarto/
 
-# Local Shiny application and deployment metadata
-/app.R
-/www/
-/rsconnect/
-/app-tests/
+# Local Shiny website, tests, assets, and deployment metadata
+/website/

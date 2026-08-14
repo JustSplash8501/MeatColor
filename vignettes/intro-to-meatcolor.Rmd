@@ -256,9 +256,8 @@ calibration object for the calibrated AMSA K/S method:
 
 ```{r myoglobin-reference, eval=FALSE}
 calibration <- myoglobin_calibration(
-  omb_reference = omb_reference_scans,
-  dmb_reference = dmb_reference_scans,
-  mmb_reference = mmb_reference_scans,
+  reference_data = reference_scans,
+  form_col = form,
   reflectance_scale = "percent"
 )
 
@@ -267,12 +266,15 @@ myoglobin_calibration_ratios(calibration)
 plot(calibration)
 ```
 
-All four data frames must contain the same 470, 480, 520, 530, 570, 580, and
-610 nm columns. Replicate reference scans are summarized after their K/S ratios
-are calculated. The OMb, DMb, and MMb estimates are calibrated independently,
-so their sum is reported but is not forced to equal 100%. The calibration plot
-is a regular ggplot object. `myoglobin_ref()` remains available as a concise
-one-call interface when the references will only be applied once.
+The combined reference table uses `"OMb"`, `"DMb"`, and `"MMb"` form values by
+default, and custom labels can be mapped with `form_values`. It and the sample
+data must contain the same 470, 480, 520, 530, 570, 580, and 610 nm columns.
+Replicate reference scans are summarized after their K/S ratios are calculated.
+Three separate reference data frames remain supported. The OMb, DMb, and MMb
+estimates are calibrated independently, so their sum is reported but is not
+forced to equal 100%. The calibration plot is a regular ggplot object.
+`myoglobin_ref()` remains available as a concise one-call interface when the
+references will only be applied once.
 
 ## Interpreting Results
 

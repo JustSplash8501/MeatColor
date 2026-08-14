@@ -5,9 +5,16 @@
 #' resulting object can be reused with [stats::predict()] for
 #' multiple sample data sets measured with the same instrument setup.
 #'
-#' @param omb_reference,dmb_reference,mmb_reference Data frames containing one
-#'   or more replicate spectra for prepared 100 percent OMb, DMb, and MMb
-#'   references.
+#' @param omb_reference,dmb_reference,mmb_reference Optional data frames
+#'   containing one or more replicate spectra for prepared 100 percent OMb,
+#'   DMb, and MMb references. Supply all three, or use `reference_data` and
+#'   `form_col` instead.
+#' @param reference_data Optional single data frame containing all OMb, DMb,
+#'   and MMb reference spectra.
+#' @param form_col Unquoted or quoted name of the column in `reference_data`
+#'   identifying the myoglobin form.
+#' @param form_values Named character vector mapping the canonical names
+#'   `OMb`, `DMb`, and `MMb` to values in `form_col`.
 #' @param r470_col,r480_col,r520_col,r530_col,r570_col,r580_col,r610_col Names
 #'   of the reflectance columns at the indicated wavelengths.
 #' @param reflectance_scale Input scale shared by the reference and future
@@ -32,11 +39,22 @@
 #' )
 #' calibration
 #'
+#' combined_references <- rbind(
+#'   transform(reference, form = "OMb", R610 = 45),
+#'   transform(reference, form = "DMb", R470 = 30, R480 = 30),
+#'   transform(reference, form = "MMb", R570 = 40, R580 = 40)
+#' )
+#' myoglobin_calibration(
+#'   reference_data = combined_references,
+#'   form_col = form,
+#'   reflectance_scale = "percent"
+#' )
+#'
 #' @export
 myoglobin_calibration <- function(
-  omb_reference,
-  dmb_reference,
-  mmb_reference,
+  omb_reference = NULL,
+  dmb_reference = NULL,
+  mmb_reference = NULL,
   r470_col = "R470",
   r480_col = "R480",
   r520_col = "R520",
@@ -45,7 +63,10 @@ myoglobin_calibration <- function(
   r580_col = "R580",
   r610_col = "R610",
   reflectance_scale = c("percent", "proportion"),
-  reference_summary = c("mean", "median")
+  reference_summary = c("mean", "median"),
+  reference_data = NULL,
+  form_col = NULL,
+  form_values = c(OMb = "OMb", DMb = "DMb", MMb = "MMb")
 ) {
   reflectance_scale <- match.arg(reflectance_scale)
   reference_summary <- match.arg(reference_summary)
@@ -60,11 +81,47 @@ myoglobin_calibration <- function(
   )
   invisible(Map(validate_column_name, column_args, names(column_args)))
 
-  reference_spectra <- list(
+  separate_references <- list(
     OMb = omb_reference,
     DMb = dmb_reference,
     MMb = mmb_reference
   )
+  form_column <- rlang::enquo(form_col)
+  if (is.null(reference_data)) {
+    if (!rlang::quo_is_null(form_column)) {
+      stop("`form_col` requires `reference_data`.", call. = FALSE)
+    }
+    missing_references <- names(separate_references)[vapply(
+      separate_references,
+      is.null,
+      logical(1)
+    )]
+    if (length(missing_references) > 0L) {
+      stop(
+        "Supply `reference_data` and `form_col`, or all of ",
+        "`omb_reference`, `dmb_reference`, and `mmb_reference`.",
+        call. = FALSE
+      )
+    }
+    reference_spectra <- separate_references
+  } else {
+    if (any(!vapply(separate_references, is.null, logical(1)))) {
+      stop(
+        "Use either `reference_data` or the three separate reference data ",
+        "frames, not both.",
+        call. = FALSE
+      )
+    }
+    if (rlang::quo_is_null(form_column)) {
+      stop("`form_col` is required with `reference_data`.", call. = FALSE)
+    }
+    reference_spectra <- split_myoglobin_reference_data(
+      reference_data,
+      form_column,
+      form_values
+    )
+  }
+
   prepared_references <- Map(
     function(reference, form) {
       prepare_ks_spectra(
@@ -101,6 +158,69 @@ myoglobin_calibration <- function(
     ),
     class = "myoglobin_calibration"
   )
+}
+
+split_myoglobin_reference_data <- function(data, form_column, form_values) {
+  if (!is.data.frame(data)) {
+    stop("`reference_data` must be a data frame.", call. = FALSE)
+  }
+  if (nrow(data) == 0L) {
+    stop("`reference_data` must contain at least one row.", call. = FALSE)
+  }
+
+  expected_forms <- c("OMb", "DMb", "MMb")
+  if (
+    !is.character(form_values) || length(form_values) != 3L ||
+      anyNA(form_values) || any(!nzchar(form_values)) ||
+      is.null(names(form_values)) ||
+      !setequal(names(form_values), expected_forms) ||
+      anyDuplicated(form_values)
+  ) {
+    stop(
+      "`form_values` must be a uniquely valued character vector named ",
+      "`OMb`, `DMb`, and `MMb`.",
+      call. = FALSE
+    )
+  }
+  form_values <- form_values[expected_forms]
+  form_name <- tidy_column_name(form_column, "form_col")
+  if (!form_name %in% names(data)) {
+    stop("Missing reference form column: ", form_name, call. = FALSE)
+  }
+
+  forms <- data[[form_name]]
+  if (!is.atomic(forms) || is.list(forms)) {
+    stop("`form_col` must identify an atomic column.", call. = FALSE)
+  }
+  forms <- as.character(forms)
+  if (anyNA(forms) || any(!nzchar(forms))) {
+    stop("Reference forms must not be missing or empty.", call. = FALSE)
+  }
+  unexpected <- setdiff(unique(forms), unname(form_values))
+  if (length(unexpected) > 0L) {
+    stop(
+      "Unexpected reference form values: ",
+      paste(unexpected, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+  missing_forms <- names(form_values)[!form_values %in% forms]
+  if (length(missing_forms) > 0L) {
+    stop(
+      "Missing reference forms: ",
+      paste(missing_forms, collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
+  references <- lapply(
+    expected_forms,
+    function(form) data[forms == form_values[[form]], , drop = FALSE]
+  )
+  names(references) <- expected_forms
+  references
 }
 
 #' @rdname myoglobin_calibration

@@ -7,9 +7,9 @@
 ^\.gitignore$
 ^\.renvignore$
 ^\.DS_Store$
-^app\.R$
-^app-tests$
 ^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$
+^CITATION\.cff$
 ^cran-comments\.md$
 ^CRAN-RELEASE$
 ^data-raw$
@@ -24,9 +24,8 @@
 ^_pkgdown\.yml$
 ^renv$
 ^renv\.lock$
-^rsconnect$
 ^Screenshot 2026-01-20 at 11\.43\.02\.png$
 ^SUPPORT\.md$
 ^vignettes/.*\.html$
 ^vignettes/.*_cache$
-^www$
+^website$

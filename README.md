@@ -2,8 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/JustSplash8501/MeatColor/actions/workflows/R-CMD-check.yaml/badge.svg?branch=master)](https://github.com/JustSplash8501/MeatColor/actions/workflows/R-CMD-check.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![Version: 0.1.1](https://img.shields.io/badge/version-0.1.1-blue.svg)](https://github.com/JustSplash8501/MeatColor)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![Version: 0.2.0](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/JustSplash8501/MeatColor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
@@ -220,8 +220,13 @@ teaching app is hosted separately; its source code is not part of this package.
   [issue tracker](https://github.com/JustSplash8501/MeatColor/issues).
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing substantial changes.
 
-MeatColor is currently experimental. Interfaces may evolve as the package is
-tested across more instruments, products, and study designs.
+MeatColor 0.2.0 is the first formal release. Its documented interfaces are
+intended for regular research use and will be evolved through documented,
+versioned releases. Scientific methods should still be selected and interpreted
+in the context of the instrument, product, and study design.
+
+MeatColor is independently maintained and is not affiliated with or endorsed
+by any institution or company.
 
 ## Code of Conduct
 

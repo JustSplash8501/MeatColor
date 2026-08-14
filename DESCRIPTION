@@ -1,14 +1,11 @@
 Package: MeatColor
 Title: Summarize and Visualize CIELAB Color Measurements
-Version: 0.1.1
+Version: 0.2.0
 Authors@R: 
     person(
-      "Reese", "Wilson", , "Reese.Wilson@ttu.edu",
+      "Reese", "Wilson", , "ReeseAWilson02@gmail.com",
       role = c("aut", "cre", "cph"),
-      comment = c(
-        ORCID = "0009-0006-8510-4467",
-        affiliation = "Department of Animal and Food Sciences, Texas Tech University, Lubbock, Texas 79423, USA"
-      )
+      comment = c(ORCID = "0009-0006-8510-4467")
     )
 Description: Summarizes CIE L*a*b* (CIELAB) colorimeter measurements across
     experimental groups and converts the resulting coordinates to hexadecimal
@@ -18,7 +15,10 @@ Description: Summarizes CIE L*a*b* (CIELAB) colorimeter measurements across
     heatmaps; estimates oxymyoglobin, deoxymyoglobin, and metmyoglobin from
     spectral reflectance; and includes treatment-aware, customizable plotting
     tools for comparing measured color across treatments and time points in
-    meat science research.
+    meat science research. CIEDE2000 calculations follow Sharma, Wu and Dalal
+    (2005) <doi:10.1002/col.20070>, and myoglobin calculations implement the
+    meat-color measurement guidance described by King et al. (2023)
+    <doi:10.22175/mmb.12473>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
